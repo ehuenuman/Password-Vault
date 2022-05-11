@@ -5,13 +5,15 @@ import { Box, Button, Checkbox, FormControl, Icon, IconButton, Input, Slider, Te
 import { FontAwesome } from '@expo/vector-icons';
 
 function Form({
-  viewMode
+  viewMode,
+  modeForm,
+  actionChangeHandler
 }) {
   const [showPassword, setShowPassword] = useState(false);
   const [passwordConditions, setPasswordConditions] = useState([]);
 
   return (
-    <VStack maxWidth="300px" minWidth="200px">
+    <VStack maxWidth="300px">
       <FormControl isDisabled={viewMode}>
         <FormControl.Label
           _text={{
@@ -22,7 +24,7 @@ function Form({
         </FormControl.Label>
         <Input
           p={2}
-          value="Facebook"
+          placeholder="How you identify this account?"
           borderWidth={(viewMode) ? "0" : "1"}
         />
       </FormControl>
@@ -36,7 +38,7 @@ function Form({
         </FormControl.Label>
         <Input
           p={2}
-          value="w3.facebook.com"
+          placeholder="Where you go to do login?"
           borderWidth={(viewMode) ? "0" : "1"}
         />
       </FormControl>
@@ -51,7 +53,6 @@ function Form({
         <Input
           p={2}
           borderWidth={(viewMode) ? "0" : "1"}
-          value="Pepito"
           rightElement={(viewMode) &&
             <IconButton
               icon={<Icon as={FontAwesome} name="copy" />}
@@ -71,7 +72,6 @@ function Form({
         <Input
           p={2}
           borderWidth={(viewMode) ? "0" : "1"}
-          value="12345678910"
           type={showPassword ? "text" : "password"}
           rightElement={
             <Box
@@ -176,15 +176,25 @@ function Form({
           borderWidth={(viewMode) ? "0" : "1"}
           value="Social" />
       </FormControl>
-      {(!viewMode) && <Button mt={10}>
-        SAVE
-      </Button>}
+      {(!viewMode) &&
+        <Button
+          mt={10}
+          onPress={() => {
+            modeForm == "edit" ?
+              actionChangeHandler("view") :
+              console.log("New register");
+          }}
+        >
+          SAVE
+        </Button>}
     </VStack >
   )
 }
 
 Form.propTypes = {
-  viewMode: PropTypes.bool.isRequired
+  viewMode: PropTypes.bool.isRequired,
+  modeForm: PropTypes.oneOf(["view", "edit", "new"]).isRequired,
+  actionChangeHandler: PropTypes.func.isRequired
 }
 
 export default Form
