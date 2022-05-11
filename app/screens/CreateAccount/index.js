@@ -23,15 +23,15 @@ function CreateAccount() {
         maxWidth={300}
       >
         <Box>
-          <FormControl isRequired isInvalid >
+          <FormControl >
             <FormControl.Label>NAME</FormControl.Label>
             <Input p={2} />
           </FormControl>
-          <FormControl isRequired isInvalid >
+          <FormControl >
             <FormControl.Label>EMAIL</FormControl.Label>
             <Input p={2} />
           </FormControl>
-          <FormControl isRequired isInvalid >
+          <FormControl >
             <FormControl.Label>MASTER PASSWORD</FormControl.Label>
             <Input p={2} />
           </FormControl>
@@ -79,7 +79,7 @@ function CreateAccount() {
               </Checkbox>
             </Checkbox.Group>
           </Box>
-          <FormControl isRequired isInvalid >
+          <FormControl>
             <FormControl.Label>CONFIRM PASSWORD</FormControl.Label>
             <Input p={2} />
           </FormControl>
