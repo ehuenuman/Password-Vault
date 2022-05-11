@@ -64,3 +64,6 @@ buck-out/
 
 #expo
 .expo
+
+#Test data
+/test-data
