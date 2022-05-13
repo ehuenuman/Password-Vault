@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from "prop-types";
 
 import {
   Box,
@@ -9,9 +10,9 @@ import AppBar from './components/AppBar';
 
 import Form from './components/Form';
 
-export default function UserPasswordData() {
+function UserPasswordData({ action }) {
 
-  const [formAction, setFormAction] = useState("new"); // "view"|"edit"|"new"
+  const [formAction, setFormAction] = useState(action);
 
   const changeFormAction = (action) => {
     setFormAction(action);
@@ -41,3 +42,9 @@ export default function UserPasswordData() {
 
   )
 }
+
+UserPasswordData.propTypes = {
+  action: PropTypes.oneOf(['view', 'edit', 'new']).isRequired
+}
+
+export default UserPasswordData
