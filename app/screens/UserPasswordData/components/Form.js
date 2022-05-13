@@ -10,7 +10,6 @@ function Form({
   actionChangeHandler
 }) {
   const [showPassword, setShowPassword] = useState(false);
-  const [passwordConditions, setPasswordConditions] = useState([]);
 
   return (
     <VStack maxWidth="300px">
@@ -107,17 +106,13 @@ function Form({
       </FormControl>
 
       {(!viewMode) &&
-        <Box
-          m={2}
-        >
-          <Box
-            marginBottom="3"
-          >
+        <Box mx={2}>
+          <Box>
             <Slider
               defaultValue={0}
               maxValue={100}
               step={1}
-              marginBottom="-2"
+              mb={-2}
             >
               <Slider.Track >
                 <Slider.FilledTrack />
@@ -132,35 +127,6 @@ function Form({
               <Text fontSize="xs">High</Text>
             </Box>
           </Box>
-          <Checkbox.Group
-            flexDirection="row"
-            alignSelf="center"
-            px={2}
-            defaultValue={passwordConditions}
-            onChange={values => {
-              setPasswordConditions(values || []);
-            }}
-          >
-            <Checkbox
-              isDisabled
-              size="sm"
-              value="Numbers"
-              mr={2}
-              _text={{
-                textTransform: "uppercase",
-                fontSize: "xs",
-                marginLeft: "0"
-              }}
-            >
-              Numbers
-            </Checkbox>
-            <Checkbox isDisabled size="sm" value="Letters" mr={2} _text={{ textTransform: "uppercase", fontSize: "xs", marginLeft: "0" }}>
-              Letters
-            </Checkbox>
-            <Checkbox isDisabled size="sm" value="Symbols" _text={{ textTransform: "uppercase", fontSize: "xs", marginLeft: "0" }}>
-              Symbols
-            </Checkbox>
-          </Checkbox.Group>
         </Box>
       }
       <FormControl isDisabled={viewMode}>
