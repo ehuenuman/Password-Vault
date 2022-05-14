@@ -45,7 +45,6 @@ const SuggestBrands = ({
           borderTopWidth="0"
           borderColor="primary.300"
           position="relative"
-          zIndex=""
           width="96%"
           left="2%"
         >
