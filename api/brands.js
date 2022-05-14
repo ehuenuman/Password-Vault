@@ -2,7 +2,6 @@ import { getFirestore, collection, addDoc, getDocs } from "firebase/firestore";
 
 import { app } from "./firebaseConfig";
 import { BrandFetchKey } from "./keys";
-import FireStoreParser from "../app/utils/FirestoreParser";
 
 const db = getFirestore(app);
 var myHeaders = new Headers();
