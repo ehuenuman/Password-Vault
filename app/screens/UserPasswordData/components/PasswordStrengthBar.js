@@ -1,8 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Box, Progress, Text } from 'native-base';
-import { setStatusBarBackgroundColor } from 'expo-status-bar';
-import { validateCallback } from '@firebase/util';
 
 const setColorBar = value => {
   let colorScheme;
