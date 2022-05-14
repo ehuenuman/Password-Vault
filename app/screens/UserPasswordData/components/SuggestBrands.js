@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from "react";
+import PropTypes from 'prop-types';
 import { TouchableOpacity } from "react-native";
-import { Avatar, Box, FlatList, HStack, PresenceTransition, Pressable, ScrollView, Text, VStack } from "native-base";
+import { useFormikContext } from "formik";
+import { Avatar, Box, FlatList, HStack, PresenceTransition, ScrollView, Text, VStack } from "native-base";
 
 import getAllBrands from "../../../../api/brands";
 
 const SuggestBrands = ({
-  query,
-  setSelectedValue
+  query
 }) => {
   const [brands, setBrands] = useState([])
   const [suggestions, setSuggestions] = useState([]);
+  const { setValues } = useFormikContext();
 
   useEffect(() => {
     getAllBrands().then(data => {
@@ -54,8 +56,12 @@ const SuggestBrands = ({
               renderItem={({ item }) => (
                 < TouchableOpacity
                   onPress={() => {
-                    setSelectedValue(item.name);
                     setSuggestions([]);
+                    setValues({
+                      logo: getLogo(item),
+                      accountName: item.name,
+                      website: item.domain
+                    });
                   }}
                 >
                   <HStack
@@ -70,7 +76,7 @@ const SuggestBrands = ({
                         uri: getLogo(item)
                       }}
                     >
-                      {query.toUpperCase().slice(2)}
+                      {query.toUpperCase().slice(0, 2)}
                     </Avatar>
                     <Text fontSize="sm">{item.name}</Text>
                   </HStack>
@@ -82,6 +88,10 @@ const SuggestBrands = ({
       </PresenceTransition>
     </Box >
   )
+}
+
+SuggestBrands.propTypes = {
+  query: PropTypes.string.isRequired
 }
 
 export default SuggestBrands
