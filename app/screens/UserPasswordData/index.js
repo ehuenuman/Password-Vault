@@ -13,12 +13,12 @@ import {
 } from 'native-base';
 import { FontAwesome } from '@expo/vector-icons';
 
-import createUserPasswordData from '../../../api/userPasswordData';
 import AppBar from './components/AppBar';
 import InputField from './components/InputField';
 import SuggestBrands from './components/SuggestBrands';
 import PasswordInputField from './components/PasswordInputField';
 import ModalCategories from './components/ModalCategories';
+import { createUserPasswordData } from '../../../api/userPasswordData';
 
 function UserPasswordData({ action }) {
 
@@ -31,13 +31,13 @@ function UserPasswordData({ action }) {
   }
 
   const submitForm = values => {
-    console.log("FormMode", action);
+    // console.log("FormMode", action);
     if (action == "edit") {
       changeFormMode("view");
     } else {
       createUserPasswordData(values).then(
         () => {
-          console.log("New Regiter Created")
+          // console.log("New Regiter Created")
           changeFormMode("view");
           successToast.show({
             description: "Password Saved"
@@ -67,7 +67,7 @@ function UserPasswordData({ action }) {
             initialValues={formInitialValues}
             onSubmit={values => submitForm(values)}
           >
-            {({ handleChange, handleBlur, handleSubmit, values }) => (
+            {({ handleChange, handleBlur, handleSubmit, values, isSubmitting }) => (
               <VStack maxWidth="300px">
                 <Avatar
                   bg="primary.500"
@@ -138,8 +138,8 @@ function UserPasswordData({ action }) {
                 />
                 <ModalCategories isOpen={showModal} setShowModal={setShowModal} />
                 {
-                  (!formMode == "view" ? false : true) &&
-                  <Button mt={10} onPress={handleSubmit}>
+                  (formMode != "view") &&
+                  <Button mt={10} onPress={handleSubmit} isLoading={isSubmitting} isLoadingText="PROTECTING DATA">
                     SAVE
                   </Button>
                 }
