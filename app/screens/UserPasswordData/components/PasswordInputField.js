@@ -39,17 +39,18 @@ function PasswordInputField({
                 setShowPassword(!showPassword)
               }}
             />
-            {(viewMode) ?
+            {/* {(viewMode) ? */}
+            {(viewMode) &&
               <IconButton
                 icon={<Icon as={FontAwesome} name="copy" />}
                 borderRadius="full"
               />
-              :
-              <Button
-                variant="ghost"
-              >
-                Generate
-              </Button>
+              // :
+              // <Button
+              //   variant="ghost"
+              // >
+              //   Generate
+              // </Button>
             }
           </Box>
         }
