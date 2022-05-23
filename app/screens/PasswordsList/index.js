@@ -1,13 +1,13 @@
 import React from 'react';
-
+import PropTypes from "prop-types";
 import { Avatar, Box, Center, Circle, Fab, FlatList, HStack, Icon, IconButton, Image, Input, Text, VStack } from 'native-base';
 import { FontAwesome, Ionicons } from '@expo/vector-icons';
 
 import SearchBar from './components/SearchBar';
 import Footer from './components/Footer';
 
-function PasswordsList() {
-  const data = [
+function PasswordsList({ data }) {
+  const FAKE_DATA = [
     {
       "_id": "6279e7d24f4035e9700c39fe",
       "accountName": "Google",
@@ -246,4 +246,7 @@ function PasswordsList() {
   );
 }
 
+PasswordsList.protoType = {
+  data: PropTypes.object.isRequired
+}
 export default PasswordsList;
