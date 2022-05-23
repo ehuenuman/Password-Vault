@@ -11,7 +11,7 @@ const SuggestBrands = ({
 }) => {
   const [brands, setBrands] = useState([])
   const [suggestions, setSuggestions] = useState([]);
-  const { setValues } = useFormikContext();
+  const { values, setValues } = useFormikContext();
 
   useEffect(() => {
     getAllBrands().then(data => {
@@ -58,9 +58,10 @@ const SuggestBrands = ({
                   onPress={() => {
                     setSuggestions([]);
                     setValues({
+                      ...values,
                       logo: getLogo(item),
                       accountName: item.name,
-                      website: item.domain
+                      website: item.domain,
                     });
                   }}
                 >
