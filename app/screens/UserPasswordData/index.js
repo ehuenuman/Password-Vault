@@ -8,10 +8,12 @@ import {
   Icon,
   IconButton,
   ScrollView,
+  useToast,
   VStack
 } from 'native-base';
 import { FontAwesome } from '@expo/vector-icons';
 
+import createUserPasswordData from '../../../api/userPasswordData';
 import AppBar from './components/AppBar';
 import InputField from './components/InputField';
 import SuggestBrands from './components/SuggestBrands';
@@ -22,9 +24,27 @@ function UserPasswordData({ action }) {
 
   const [formMode, setFormMode] = useState(action);
   const [showModal, setShowModal] = useState(false);
+  const successToast = useToast();
 
   const changeFormMode = (action) => {
     setFormMode(action);
+  }
+
+  const submitForm = values => {
+    console.log("FormMode", action);
+    if (action == "edit") {
+      changeFormMode("view");
+    } else {
+      createUserPasswordData(values).then(
+        () => {
+          console.log("New Regiter Created")
+          changeFormMode("view");
+          successToast.show({
+            description: "Password Saved"
+          });
+        },
+        error => console.log("Error:", error))
+    }
   }
 
   const formInitialValues = {
@@ -45,12 +65,7 @@ function UserPasswordData({ action }) {
         <Box px="15%">
           <Formik
             initialValues={formInitialValues}
-            onSubmit={values => {
-              console.log(values);
-              modeForm == "edit" ?
-                changeFormMode("view") :
-                console.log("New register");
-            }}
+            onSubmit={values => submitForm(values)}
           >
             {({ handleChange, handleBlur, handleSubmit, values }) => (
               <VStack maxWidth="300px">
