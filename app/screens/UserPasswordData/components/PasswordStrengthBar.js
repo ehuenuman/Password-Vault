@@ -13,7 +13,7 @@ const setColorBar = value => {
 }
 
 const PasswordStrengthBar = ({
-  value = value,
+  value,
   ...props }
 ) => {
   return (
