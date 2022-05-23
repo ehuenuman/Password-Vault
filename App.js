@@ -1,5 +1,5 @@
 import React from 'react';
-import { NativeBaseProvider, Box, extendTheme } from 'native-base';
+import { NativeBaseProvider, extendTheme } from 'native-base';
 
 import CreateAccount from './app/screens/CreateAccount';
 import PasswordsList from './app/screens/PasswordsList';
