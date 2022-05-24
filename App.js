@@ -1,31 +1,25 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { NativeBaseProvider, extendTheme, View } from 'native-base';
 import * as SplashScreen from 'expo-splash-screen';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { NativeBaseProvider, extendTheme, Box, Image, Center } from 'native-base';
 
-import CreateAccount from './app/screens/CreateAccount';
 import PasswordsList from './app/screens/PasswordsList';
 import UserPasswordData from './app/screens/UserPasswordData';
-import { getAllEncryptedData } from './api/userPasswordData';
+import { vault } from './app/data/vault';
 
 export default function App() {
   const [appIsReady, setAppIsReady] = useState(false);
-  const [encryptedData, setEncryptedData] = useState();
 
   useEffect(() => {
     async function prepare() {
       try {
         await SplashScreen.preventAutoHideAsync();
-        await getAllEncryptedData().then(
-          data => {
-            console.log("fetching data");
-            setEncryptedData(data);
-          },
-          () => console.log("Fail"));
+        await vault.init().then(response => {
+          response && setAppIsReady(true);
+        });
       } catch (error) {
         console.warn(error)
-      } finally {
-        console.log("finally");
-        setAppIsReady(true);
       }
     }
 
@@ -42,14 +36,26 @@ export default function App() {
     return null;
   }
 
+  const Stack = createNativeStackNavigator();
+
   return (
     <NativeBaseProvider theme={theme}>
-      <View onLayout={onLayoutRootView} flex={1}>
-        {/* < CreateAccount /> */}
-        <PasswordsList data={encryptedData} />
-        {/* <UserPasswordData action="new" /> */}
-      </View>
-    </NativeBaseProvider>
+      <Box onLayout={onLayoutRootView} flex={1}>
+        <NavigationContainer>
+          <Stack.Navigator
+            initialRouteName="Home"
+            screenOptions={{
+              headerTitle: (props) => <Center><Image source={require("./app/assets/favicon.png")} alt="Password Vault" size="25px" /></Center>,
+              headerTitleAlign: "center",
+              headerTintColor: theme.colors.primary[600]
+            }}
+          >
+            <Stack.Screen name="Home" component={PasswordsList} />
+            <Stack.Screen name="UserPasswordData" component={UserPasswordData} initialParams={{ passwordId: "", action: "new" }} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </Box>
+    </NativeBaseProvider >
   );
 }
 
