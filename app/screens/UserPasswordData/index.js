@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import PropTypes from "prop-types";
+import React, { useLayoutEffect, useState } from 'react';
 import { Formik } from 'formik';
 import {
   Avatar,
@@ -19,26 +18,54 @@ import SuggestBrands from './components/SuggestBrands';
 import PasswordInputField from './components/PasswordInputField';
 import ModalCategories from './components/ModalCategories';
 import { createUserPasswordData } from '../../../api/userPasswordData';
+import { vault } from '../../data/vault';
 
-function UserPasswordData({ action }) {
+function UserPasswordData({ route, navigation }) {
 
+  const { passwordId, action } = route.params;
   const [formMode, setFormMode] = useState(action);
   const [showModal, setShowModal] = useState(false);
   const successToast = useToast();
 
-  const changeFormMode = (action) => {
-    setFormMode(action);
+  var register = vault.registerById(passwordId)
+  var formInitialValues = {
+    logo: register?.logo ?? "",
+    accountName: register?.accountName ?? "",
+    website: register?.website ?? "",
+    user: register?.user ?? "",
+    password: register?.password ?? "",
+    passwordStrength: register?.passwordStrength ?? 0,
+    category: register?.category ?? ""
   }
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Button
+          variant="ghost"
+          onPress={() => {
+            if (formMode == "new") {
+              console.log("New register created");
+            } else {
+              formMode == "view" ? setFormMode("edit") : setFormMode("view");
+            }
+          }}
+        >
+          {(formMode == "view") ? "Edit" : "Save"}
+        </Button>
+      ),
+    });
+  }, [navigation, formMode]);
 
   const submitForm = values => {
     // console.log("FormMode", action);
-    if (action == "edit") {
-      changeFormMode("view");
+    if (formMode == "edit") {
+      setFormMode("view");
     } else {
       createUserPasswordData(values).then(
         () => {
           // console.log("New Regiter Created")
-          changeFormMode("view");
+          setFormMode("view");
           successToast.show({
             description: "Password Saved"
           });
@@ -47,20 +74,9 @@ function UserPasswordData({ action }) {
     }
   }
 
-  const formInitialValues = {
-    logo: "",
-    accountName: "",
-    website: "",
-    user: "",
-    password: "",
-    passwordStrength: 0,
-    category: ""
-  }
-
   return (
-    <Box safeAreaTop>
-      <AppBar action={formMode} actionChangeHandler={changeFormMode} />
-
+    <Box flex="1" bg="white">
+      {/* <AppBar action={formMode} actionChangeHandler={changeFormMode} /> */}
       <ScrollView>
         <Box px="15%">
           <Formik
@@ -150,10 +166,6 @@ function UserPasswordData({ action }) {
       </ScrollView>
     </Box>
   )
-}
-
-UserPasswordData.propTypes = {
-  action: PropTypes.oneOf(['view', 'edit', 'new']).isRequired
 }
 
 export default UserPasswordData
