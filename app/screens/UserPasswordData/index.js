@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import PropTypes from "prop-types";
+import React, { useLayoutEffect, useState } from 'react';
 import { Formik } from 'formik';
 import {
   Avatar,
@@ -8,6 +7,7 @@ import {
   Icon,
   IconButton,
   ScrollView,
+  useToast,
   VStack
 } from 'native-base';
 import { FontAwesome } from '@expo/vector-icons';
@@ -17,42 +17,73 @@ import InputField from './components/InputField';
 import SuggestBrands from './components/SuggestBrands';
 import PasswordInputField from './components/PasswordInputField';
 import ModalCategories from './components/ModalCategories';
+import { createUserPasswordData } from '../../../api/userPasswordData';
+import { vault } from '../../data/vault';
 
-function UserPasswordData({ action }) {
+function UserPasswordData({ route, navigation }) {
 
+  const { passwordId, action } = route.params;
   const [formMode, setFormMode] = useState(action);
   const [showModal, setShowModal] = useState(false);
+  const successToast = useToast();
 
-  const changeFormMode = (action) => {
-    setFormMode(action);
+  var register = vault.registerById(passwordId)
+  var formInitialValues = {
+    logo: register?.logo ?? "",
+    accountName: register?.accountName ?? "",
+    website: register?.website ?? "",
+    user: register?.user ?? "",
+    password: register?.password ?? "",
+    passwordStrength: register?.passwordStrength ?? 0,
+    category: register?.category ?? ""
   }
 
-  const formInitialValues = {
-    logo: "",
-    accountName: "",
-    website: "",
-    user: "",
-    password: "",
-    passwordStrength: 0,
-    category: ""
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Button
+          variant="ghost"
+          onPress={() => {
+            if (formMode == "new") {
+              console.log("New register created");
+            } else {
+              formMode == "view" ? setFormMode("edit") : setFormMode("view");
+            }
+          }}
+        >
+          {(formMode == "view") ? "Edit" : "Save"}
+        </Button>
+      ),
+    });
+  }, [navigation, formMode]);
+
+  const submitForm = values => {
+    // console.log("FormMode", action);
+    if (formMode == "edit") {
+      setFormMode("view");
+    } else {
+      createUserPasswordData(values).then(
+        () => {
+          // console.log("New Regiter Created")
+          setFormMode("view");
+          successToast.show({
+            description: "Password Saved"
+          });
+        },
+        error => console.log("Error:", error))
+    }
   }
 
   return (
-    <Box safeAreaTop>
-      <AppBar action={formMode} actionChangeHandler={changeFormMode} />
-
+    <Box flex="1" bg="white">
+      {/* <AppBar action={formMode} actionChangeHandler={changeFormMode} /> */}
       <ScrollView>
         <Box px="15%">
           <Formik
             initialValues={formInitialValues}
-            onSubmit={values => {
-              console.log(values);
-              modeForm == "edit" ?
-                changeFormMode("view") :
-                console.log("New register");
-            }}
+            onSubmit={values => submitForm(values)}
           >
-            {({ handleChange, handleBlur, handleSubmit, values }) => (
+            {({ handleChange, handleBlur, handleSubmit, values, isSubmitting }) => (
               <VStack maxWidth="300px">
                 <Avatar
                   bg="primary.500"
@@ -123,8 +154,8 @@ function UserPasswordData({ action }) {
                 />
                 <ModalCategories isOpen={showModal} setShowModal={setShowModal} />
                 {
-                  (!formMode == "view" ? false : true) &&
-                  <Button mt={10} onPress={handleSubmit}>
+                  (formMode != "view") &&
+                  <Button mt={10} onPress={handleSubmit} isLoading={isSubmitting} isLoadingText="PROTECTING DATA">
                     SAVE
                   </Button>
                 }
@@ -135,10 +166,6 @@ function UserPasswordData({ action }) {
       </ScrollView>
     </Box>
   )
-}
-
-UserPasswordData.propTypes = {
-  action: PropTypes.oneOf(['view', 'edit', 'new']).isRequired
 }
 
 export default UserPasswordData

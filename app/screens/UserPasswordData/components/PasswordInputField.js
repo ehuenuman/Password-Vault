@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Box, Button, FormControl, Icon, IconButton, Input } from 'native-base';
+import { useFormikContext } from 'formik';
+import { Box, FormControl, Icon, IconButton, Input } from 'native-base';
 import { FontAwesome } from '@expo/vector-icons';
 import PasswordStrengthBar from './PasswordStrengthBar';
 import { getPasswordEntrophy } from '../../../utils/passwordEntrophyCalculator';
@@ -13,6 +14,11 @@ function PasswordInputField({
   ...props
 }) {
   const [showPassword, setShowPassword] = useState(false);
+  const { values, setValues } = useFormikContext();
+
+  useEffect(() => {
+    setValues({ ...values, passwordStrength: getPasswordEntrophy(props.value) });
+  }, [props.value])
 
   return (
     <FormControl isDisabled={viewMode}>
@@ -58,11 +64,11 @@ function PasswordInputField({
       {(viewMode) && <FormControl.HelperText
         alignItems="flex-end"
       >
-        Security Status
+        Security Status {values.passwordStrength}
       </FormControl.HelperText>}
       {
         (!viewMode) && (hasPasswordChecker) &&
-        <PasswordStrengthBar value={getPasswordEntrophy(props.value)} />
+        <PasswordStrengthBar value={values.passwordStrength} />
       }
     </FormControl>
   )

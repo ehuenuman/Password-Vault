@@ -1,13 +1,13 @@
 import React from 'react';
-
-import { Avatar, Box, Center, Circle, Fab, FlatList, HStack, Icon, IconButton, Image, Input, Text, VStack } from 'native-base';
-import { FontAwesome, Ionicons } from '@expo/vector-icons';
+import { Avatar, Box, FlatList, HStack, Icon, IconButton, Text, VStack } from 'native-base';
+import { Ionicons } from '@expo/vector-icons';
 
 import SearchBar from './components/SearchBar';
 import Footer from './components/Footer';
+import { vault } from '../../data/vault';
 
-function PasswordsList() {
-  const data = [
+function PasswordsList({ navigation }) {
+  const FAKE_DATA = [
     {
       "_id": "6279e7d24f4035e9700c39fe",
       "accountName": "Google",
@@ -191,58 +191,57 @@ function PasswordsList() {
   ];
 
   return (
-    <VStack
-      safeAreaTop
-      flex={1}
-    >
+    <Box flex="1" bg="white" zIndex={1}>
+      <VStack flex="1">
 
-      <SearchBar />
+        {/* <SearchBar /> */}
 
-      <FlatList
-        data={data}
-        renderItem={({ item }) => (
-          <Box
-            px={10}
-            py={2}
-          >
-            <HStack
-              space="4"
-              justifyContent="space-between"
-              alignItems="center"
+        <FlatList
+          data={vault.AllDecryptedData}
+          renderItem={({ item }) => (
+            <Box
+              px="10"
+              py="2"
             >
-              <Avatar
-                size="lg"
-                bg="primary.400"
-                source={{ uri: item.logo }}
+              <HStack
+                space="4"
+                justifyContent="space-between"
+                alignItems="center"
               >
-              </Avatar>
-              <VStack
-                flex={1}
-                space="1"
-                justifyContent="center"
-              >
-                <Text
-                  fontWeight="bold"
-                  textTransform="uppercase"
+                <Avatar
+                  size="lg"
+                  bg="primary.400"
+                  source={{ uri: item.logo }}
                 >
-                  {item.accountName}
-                </Text>
-                <Text>{item.category}</Text>
-              </VStack>
-              <Icon
-                as={FontAwesome}
-                name="chevron-right"
-                size="xl"
-              />
-            </HStack>
-          </Box>
+                </Avatar>
+                <VStack
+                  flex="1"
+                  space="1"
+                  justifyContent="center"
+                >
+                  <Text
+                    fontWeight="bold"
+                    textTransform="uppercase"
+                  >
+                    {item.accountName}
+                  </Text>
+                  <Text>{item.category}</Text>
+                </VStack>
+                <IconButton
+                  size="lg"
+                  borderRadius="full"
+                  icon={<Icon as={Ionicons} name="chevron-forward" />}
+                  onPress={() => navigation.navigate("UserPasswordData", { passwordId: item.id, action: "view" })}
+                />
+              </HStack>
+            </Box>
+          )}
+        />
 
-        )}
+        <Footer />
 
-      />
-      <Footer />
-    </VStack>
-
+      </VStack>
+    </Box>
   );
 }
 
