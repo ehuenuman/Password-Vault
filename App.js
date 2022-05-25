@@ -10,12 +10,13 @@ import { vault } from './app/data/vault';
 
 export default function App() {
   const [appIsReady, setAppIsReady] = useState(false);
+  const [decryptedData, setDecryptedData] = useState();
 
   useEffect(() => {
     async function prepare() {
       try {
         await SplashScreen.preventAutoHideAsync();
-        await vault.init().then(response => {
+        await vault.init(setDecryptedData).then(response => {
           response && setAppIsReady(true);
         });
       } catch (error) {
@@ -50,7 +51,7 @@ export default function App() {
               headerTintColor: theme.colors.primary[600]
             }}
           >
-            <Stack.Screen name="Home" component={PasswordsList} />
+            <Stack.Screen name="Home" component={PasswordsList} initialParams={{ decryptedData: decryptedData }} />
             <Stack.Screen name="UserPasswordData" component={UserPasswordData} initialParams={{ passwordId: "", action: "new" }} />
           </Stack.Navigator>
         </NavigationContainer>
