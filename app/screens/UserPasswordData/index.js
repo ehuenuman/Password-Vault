@@ -12,12 +12,10 @@ import {
 } from 'native-base';
 import { FontAwesome } from '@expo/vector-icons';
 
-import AppBar from './components/AppBar';
 import InputField from './components/InputField';
 import SuggestBrands from './components/SuggestBrands';
 import PasswordInputField from './components/PasswordInputField';
 import ModalCategories from './components/ModalCategories';
-import { createUserPasswordData } from '../../../api/userPasswordData';
 import { vault } from '../../data/vault';
 
 function UserPasswordData({ route, navigation }) {
@@ -58,25 +56,25 @@ function UserPasswordData({ route, navigation }) {
   }, [navigation, formMode]);
 
   const submitForm = values => {
-    // console.log("FormMode", action);
     if (formMode == "edit") {
+      // TO DO: Actions to edit a register
       setFormMode("view");
     } else {
-      createUserPasswordData(values).then(
-        () => {
-          // console.log("New Regiter Created")
-          setFormMode("view");
-          successToast.show({
-            description: "Password Saved"
-          });
-        },
-        error => console.log("Error:", error))
+      vault.newRegister(values)
+        .then(
+          (message) => {
+            setFormMode("view");
+            successToast.show({
+              description: "Password Saved"
+            });
+          },
+          error => console.log("Error:", error)
+        );
     }
   }
 
   return (
     <Box flex="1" bg="white">
-      {/* <AppBar action={formMode} actionChangeHandler={changeFormMode} /> */}
       <ScrollView>
         <Box px="15%">
           <Formik
