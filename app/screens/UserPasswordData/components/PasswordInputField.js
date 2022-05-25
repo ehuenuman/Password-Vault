@@ -20,6 +20,10 @@ function PasswordInputField({
     setValues({ ...values, passwordStrength: getPasswordEntrophy(props.value) });
   }, [props.value])
 
+  useEffect(() => {
+    setShowPassword(false);
+  }, [viewMode]);
+
   return (
     <FormControl isDisabled={viewMode}>
       <FormControl.Label
