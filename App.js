@@ -6,6 +6,7 @@ import { NativeBaseProvider, extendTheme, Box, Image, Center } from 'native-base
 
 import PasswordsList from './app/screens/PasswordsList';
 import UserPasswordData from './app/screens/UserPasswordData';
+import theme from './app/theme/base';
 import { vault } from './app/data/vault';
 
 export default function App() {
@@ -59,15 +60,3 @@ export default function App() {
     </NativeBaseProvider >
   );
 }
-
-const theme = extendTheme({
-  components: {
-    Input: {
-      baseStyle: {
-        _disabled: {
-          opacity: 1
-        }
-      }
-    }
-  }
-});
