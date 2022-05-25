@@ -1,10 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
+import * as Clipboard from 'expo-clipboard';
 import { useFormikContext } from 'formik';
-import { Box, FormControl, Icon, IconButton, Input } from 'native-base';
+import { Box, FormControl, Icon, IconButton, Input, Text } from 'native-base';
 import { FontAwesome } from '@expo/vector-icons';
+
 import PasswordStrengthBar from './PasswordStrengthBar';
 import { getPasswordEntrophy } from '../../../utils/passwordEntrophyCalculator';
+
+const getSecurityStatusMessage = passwordEntrophy => {
+  var message;
+  (passwordEntrophy <= 25) ? message = "Extremely weak"
+    : (passwordEntrophy <= 50) ? message = "Very week"
+      : (passwordEntrophy <= 70) ? message = "Not so strong"
+        : (passwordEntrophy <= 85) ? message = "Strong"
+          : (passwordEntrophy > 90) && (message = "Super strong")
+  return message
+}
 
 function PasswordInputField({
   label,
@@ -23,6 +35,10 @@ function PasswordInputField({
   useEffect(() => {
     setShowPassword(false);
   }, [viewMode]);
+
+  const copyToClipboard = async (text) => {
+    await Clipboard.setStringAsync(text);
+  };
 
   return (
     <FormControl isDisabled={viewMode}>
@@ -54,6 +70,7 @@ function PasswordInputField({
               <IconButton
                 icon={<Icon as={FontAwesome} name="copy" />}
                 borderRadius="full"
+                onPress={() => copyToClipboard(values.password)}
               />
               // :
               // <Button
@@ -65,11 +82,14 @@ function PasswordInputField({
           </Box>
         }
       />
-      {(viewMode) && <FormControl.HelperText
-        alignItems="flex-end"
-      >
-        Security Status {values.passwordStrength}
-      </FormControl.HelperText>}
+      {(viewMode) &&
+        <FormControl.HelperText
+          alignItems="flex-end"
+        >
+          <Text>
+            Security Status: {getSecurityStatusMessage(values.passwordStrength)}
+          </Text>
+        </FormControl.HelperText>}
       {
         (!viewMode) && (hasPasswordChecker) &&
         <PasswordStrengthBar value={values.passwordStrength} />

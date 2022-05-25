@@ -1,4 +1,5 @@
 import React, { useLayoutEffect, useState } from 'react';
+import * as Clipboard from 'expo-clipboard';
 import { Formik } from 'formik';
 import {
   Avatar,
@@ -36,24 +37,28 @@ function UserPasswordData({ route, navigation }) {
     category: register?.category ?? ""
   }
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <Button
-          variant="ghost"
-          onPress={() => {
-            if (formMode == "new") {
-              console.log("New register created");
-            } else {
-              formMode == "view" ? setFormMode("edit") : setFormMode("view");
-            }
-          }}
-        >
-          {(formMode == "view") ? "Edit" : "Save"}
-        </Button>
-      ),
-    });
-  }, [navigation, formMode]);
+  const copyToClipboard = async (text) => {
+    await Clipboard.setStringAsync(text);
+  };
+
+  // useLayoutEffect(() => {
+  //   navigation.setOptions({
+  //     headerRight: () => (
+  //       <Button
+  //         variant="ghost"
+  //         onPress={() => {
+  //           if (formMode == "new") {
+  //             console.log("New register created");
+  //           } else {
+  //             formMode == "view" ? setFormMode("edit") : setFormMode("view");
+  //           }
+  //         }}
+  //       >
+  //         {(formMode == "view") ? "Edit" : "Save"}
+  //       </Button>
+  //     ),
+  //   });
+  // }, [navigation, formMode]);
 
   const submitForm = values => {
     if (formMode == "edit") {
@@ -122,6 +127,7 @@ function UserPasswordData({ route, navigation }) {
                     <IconButton
                       icon={<Icon as={FontAwesome} name="copy" />}
                       borderRadius="full"
+                      onPress={() => copyToClipboard(values.user)}
                     />
                   }
                 />
