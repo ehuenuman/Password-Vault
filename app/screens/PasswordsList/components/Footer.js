@@ -9,7 +9,7 @@ export default function Footer() {
 
   return (
     <Box>
-      <HStack bg="primary.400" minHeight={47} mt={10}></HStack>
+      <HStack bg="secondary.800" minHeight={47} mt={10}></HStack>
       <Fab
         renderInPortal={false}
         icon={

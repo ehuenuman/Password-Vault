@@ -45,7 +45,7 @@ const SuggestBrands = ({
         <VStack
           borderWidth="1"
           borderTopWidth="0"
-          borderColor="primary.300"
+          borderColor="primary.600"
           position="relative"
           width="96%"
           left="2%"
@@ -72,7 +72,7 @@ const SuggestBrands = ({
                   >
                     <Avatar
                       size="sm"
-                      bg="primary.500"
+                      bg="primary.600"
                       source={{
                         uri: getLogo(item)
                       }}

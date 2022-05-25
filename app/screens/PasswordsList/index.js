@@ -215,7 +215,7 @@ function PasswordsList({ route, navigation }) {
               >
                 <Avatar
                   size="lg"
-                  bg="primary.400"
+                  bg="primary.600"
                   source={{ uri: item.logo }}
                 >
                 </Avatar>

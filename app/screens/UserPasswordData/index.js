@@ -84,7 +84,7 @@ function UserPasswordData({ route, navigation }) {
             {({ handleChange, handleBlur, handleSubmit, values, isSubmitting }) => (
               <VStack maxWidth="300px">
                 <Avatar
-                  bg="primary.500"
+                  bg="primary.600"
                   source={{
                     uri: values.logo
                   }}
