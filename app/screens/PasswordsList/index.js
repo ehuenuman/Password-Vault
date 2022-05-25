@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Avatar, Box, FlatList, HStack, Icon, IconButton, Text, VStack } from 'native-base';
 import { Ionicons } from '@expo/vector-icons';
 
 import SearchBar from './components/SearchBar';
 import Footer from './components/Footer';
 import { vault } from '../../data/vault';
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 
-function PasswordsList({ navigation }) {
+function PasswordsList({ route, navigation }) {
   const FAKE_DATA = [
     {
       "_id": "6279e7d24f4035e9700c39fe",
@@ -190,14 +191,18 @@ function PasswordsList({ navigation }) {
     }
   ];
 
+  const { decryptedData } = route.params;
+  const isFocused = useIsFocused();
+
   return (
-    <Box flex="1" bg="white" zIndex={1}>
+    <Box flex="1" bg="white">
       <VStack flex="1">
 
         {/* <SearchBar /> */}
 
         <FlatList
-          data={vault.AllDecryptedData}
+          extraData={isFocused}
+          data={decryptedData} //vault.allDecryptedData()
           renderItem={({ item }) => (
             <Box
               px="10"
