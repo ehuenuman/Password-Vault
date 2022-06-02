@@ -50,41 +50,41 @@ const SuggestBrands = ({
           width="96%"
           left="2%"
         >
-          <ScrollView>
-            <FlatList
-              data={suggestions}
-              renderItem={({ item }) => (
-                < TouchableOpacity
-                  onPress={() => {
-                    setSuggestions([]);
-                    setValues({
-                      ...values,
-                      logo: getLogo(item),
-                      accountName: item.name,
-                      website: item.domain,
-                    });
-                  }}
+          {/* <ScrollView> */}
+          <FlatList
+            data={suggestions}
+            renderItem={({ item }) => (
+              < TouchableOpacity
+                onPress={() => {
+                  setSuggestions([]);
+                  setValues({
+                    ...values,
+                    logo: getLogo(item),
+                    accountName: item.name,
+                    website: item.domain,
+                  });
+                }}
+              >
+                <HStack
+                  space="5"
+                  alignItems="center"
+                  p="2"
                 >
-                  <HStack
-                    space="5"
-                    alignItems="center"
-                    p="2"
+                  <Avatar
+                    size="sm"
+                    bg="primary.600"
+                    source={{
+                      uri: getLogo(item)
+                    }}
                   >
-                    <Avatar
-                      size="sm"
-                      bg="primary.600"
-                      source={{
-                        uri: getLogo(item)
-                      }}
-                    >
-                      {query.toUpperCase().slice(0, 2)}
-                    </Avatar>
-                    <Text fontSize="sm">{item.name}</Text>
-                  </HStack>
-                </TouchableOpacity>
-              )}
-            />
-          </ScrollView>
+                    {query.toUpperCase().slice(0, 2)}
+                  </Avatar>
+                  <Text fontSize="sm">{item.name}</Text>
+                </HStack>
+              </TouchableOpacity>
+            )}
+          />
+          {/* </ScrollView> */}
         </VStack>
       </PresenceTransition>
     </Box >

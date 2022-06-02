@@ -59,7 +59,7 @@ function PasswordInputField({
             flexDirection="row"
           >
             <IconButton
-              icon={<Icon as={FontAwesome} name={showPassword ? "eye-slash" : "eye"} />}
+              icon={<Icon as={FontAwesome} name={showPassword ? "eye" : "eye-slash"} />}
               borderRadius="full"
               onPress={() => {
                 setShowPassword(!showPassword)
