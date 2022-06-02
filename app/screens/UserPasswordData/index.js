@@ -1,7 +1,9 @@
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as Clipboard from 'expo-clipboard';
 import { Formik } from 'formik';
+import { object, string } from 'yup';
 import {
+  AlertDialog,
   Avatar,
   Box,
   Button,
@@ -23,6 +25,7 @@ function UserPasswordData({ route, navigation }) {
   const { passwordId, action } = route.params;
   const [formMode, setFormMode] = useState(action);
   const [showModal, setShowModal] = useState(false);
+  const hasUnsavedChanges = false;
   const successToast = useToast();
 
   var register = vault.registerById(passwordId)
@@ -39,6 +42,14 @@ function UserPasswordData({ route, navigation }) {
   const copyToClipboard = async (text) => {
     await Clipboard.setStringAsync(text);
   };
+
+  let formSchema = object({
+    accountName: string().required("Required field"),
+    website: string().required("Required field"),
+    user: string().required("Required field"),
+    password: string().required("Required field"),
+    category: string().required("Required field")
+  });
 
   // useLayoutEffect(() => {
   //   navigation.setOptions({
@@ -83,9 +94,10 @@ function UserPasswordData({ route, navigation }) {
         <Box px="15%">
           <Formik
             initialValues={formInitialValues}
+            validationSchema={formSchema}
             onSubmit={values => submitForm(values)}
           >
-            {({ handleChange, handleBlur, handleSubmit, values, setValues, isSubmitting }) => (
+            {({ handleChange, handleBlur, handleSubmit, values, setValues, isSubmitting, errors, touched }) => (
               <VStack maxWidth="300px">
                 <Avatar
                   bg="primary.600"
@@ -106,6 +118,8 @@ function UserPasswordData({ route, navigation }) {
                   value={values.accountName}
                   onChangeText={handleChange("accountName")}
                   onBlur={handleBlur("accountName")}
+                  error={errors.accountName}
+                  touched={touched.accountName}
                   rightElement={(formMode !== "view" ? true : false) &&
                     <Button variant="ghost" onPress={() => navigation.navigate("ServicesModal", { values: values, setValues: setValues })} >
                       Select from list
@@ -119,6 +133,8 @@ function UserPasswordData({ route, navigation }) {
                   value={values.website}
                   onChangeText={handleChange("website")}
                   onBlur={handleBlur("website")}
+                  error={errors.website}
+                  touched={touched.website}
                 />
                 <InputField
                   label="User"
@@ -126,6 +142,8 @@ function UserPasswordData({ route, navigation }) {
                   viewMode={formMode == "view" ? true : false}
                   onChangeText={handleChange("user")}
                   onBlur={handleBlur("user")}
+                  error={errors.user}
+                  touched={touched.user}
                   rightElement={(formMode == "view" ? true : false) &&
                     <IconButton
                       icon={<Icon as={FontAwesome} name="copy" />}
@@ -141,14 +159,16 @@ function UserPasswordData({ route, navigation }) {
                   hasPasswordChecker={true}
                   onChangeText={handleChange("password")}
                   onBlur={handleBlur("password")}
+                  error={errors.password}
+                  touched={touched.password}
                 />
                 <InputField
                   isDisabled={true}
                   label="Category"
                   value={values.category}
+                  error={errors.category}
+                  touched={touched.category}
                   viewMode={formMode == "view" ? true : false}
-                  // onChangeText={handleChange("categories")}
-                  // onBlur={handleBlur("categories")}
                   leftElement={(formMode == "view" ? false : true) &&
                     <Button
                       variant="outline"
