@@ -14,7 +14,6 @@ import {
 import { FontAwesome } from '@expo/vector-icons';
 
 import InputField from './components/InputField';
-import SuggestBrands from './components/SuggestBrands';
 import PasswordInputField from './components/PasswordInputField';
 import ModalCategories from './components/ModalCategories';
 import { vault } from '../../data/vault';
@@ -86,7 +85,7 @@ function UserPasswordData({ route, navigation }) {
             initialValues={formInitialValues}
             onSubmit={values => submitForm(values)}
           >
-            {({ handleChange, handleBlur, handleSubmit, values, isSubmitting }) => (
+            {({ handleChange, handleBlur, handleSubmit, values, setValues, isSubmitting }) => (
               <VStack maxWidth="300px">
                 <Avatar
                   bg="primary.600"
@@ -100,9 +99,6 @@ function UserPasswordData({ route, navigation }) {
                 >
                   {values.accountName.toUpperCase().slice(0, 2)}
                 </Avatar>
-                <Button mt={10} onPress={() => navigation.navigate("ServicesModal")} >
-                  Open Modal
-                </Button>
                 <InputField
                   label="Account Name"
                   placeHolder="How you identify this account?"
@@ -110,8 +106,12 @@ function UserPasswordData({ route, navigation }) {
                   value={values.accountName}
                   onChangeText={handleChange("accountName")}
                   onBlur={handleBlur("accountName")}
+                  rightElement={(formMode !== "view" ? true : false) &&
+                    <Button variant="ghost" onPress={() => navigation.navigate("ServicesModal", { values: values, setValues: setValues })} >
+                      Select from list
+                    </Button>
+                  }
                 />
-                <SuggestBrands query={values.accountName} />
                 <InputField
                   label="Website"
                   placeholder="Where you go to do login?"
