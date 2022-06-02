@@ -79,7 +79,7 @@ function UserPasswordData({ route, navigation }) {
 
   return (
     <Box flex="1" bg="white">
-      <ScrollView>
+      <ScrollView keyboardShouldPersistTaps="always">
         <Box px="15%">
           <Formik
             initialValues={formInitialValues}
