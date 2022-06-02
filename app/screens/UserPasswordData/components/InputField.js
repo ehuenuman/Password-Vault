@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormControl, Input } from 'native-base';
+import { FormControl, HStack, Input } from 'native-base';
 
 function InputField({
   label,
@@ -9,23 +9,25 @@ function InputField({
   ...props
 }) {
   return (
-    <FormControl isDisabled={viewMode}>
-      <FormControl.Label
-        _text={{
-          textTransform: "uppercase"
-        }}
-      >
-        {label}
-      </FormControl.Label>
+    <FormControl isDisabled={viewMode} isInvalid={props.touched && props.error && true}>
+      <HStack space="1">
+        <FormControl.Label
+          flex="1"
+          _text={{
+            textTransform: "uppercase"
+          }}
+        >
+          {label}
+        </FormControl.Label>
+        <FormControl.ErrorMessage>{props.error}</FormControl.ErrorMessage>
+      </HStack>
       <Input
         p={2}
         placeholder={placeHolder}
         borderWidth={(viewMode) ? "0" : "1"}
         {...props}
-      // value={values.accountName}
-      // onChangeText={handleChange("accountName")}
-      // onBlur={handleBlur("accountName")}
       />
+      {/* <FormControl.HelperText></FormControl.HelperText> */}
     </FormControl>
   )
 }

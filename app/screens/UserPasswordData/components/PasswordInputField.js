@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import * as Clipboard from 'expo-clipboard';
 import { useFormikContext } from 'formik';
-import { Box, FormControl, Icon, IconButton, Input, Text } from 'native-base';
+import { Box, FormControl, HStack, Icon, IconButton, Input, Text } from 'native-base';
 import { FontAwesome } from '@expo/vector-icons';
 
 import PasswordStrengthBar from './PasswordStrengthBar';
@@ -41,14 +41,18 @@ function PasswordInputField({
   };
 
   return (
-    <FormControl isDisabled={viewMode}>
-      <FormControl.Label
-        _text={{
-          textTransform: "uppercase"
-        }}
-      >
-        Password
-      </FormControl.Label>
+    <FormControl isDisabled={viewMode} isInvalid={props.touched && props.error && true}>
+      <HStack space="1">
+        <FormControl.Label
+          flex="1"
+          _text={{
+            textTransform: "uppercase"
+          }}
+        >
+          Password
+        </FormControl.Label>
+        <FormControl.ErrorMessage>{props.error}</FormControl.ErrorMessage>
+      </HStack>
       <Input
         p={2}
         borderWidth={(viewMode) ? "0" : "1"}
@@ -83,9 +87,7 @@ function PasswordInputField({
         }
       />
       {(viewMode) &&
-        <FormControl.HelperText
-          alignItems="flex-end"
-        >
+        <FormControl.HelperText alignItems="flex-end">
           <Text>
             Security Status: {getSecurityStatusMessage(values.passwordStrength)}
           </Text>
