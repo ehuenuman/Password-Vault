@@ -100,6 +100,9 @@ function UserPasswordData({ route, navigation }) {
                 >
                   {values.accountName.toUpperCase().slice(0, 2)}
                 </Avatar>
+                <Button mt={10} onPress={() => navigation.navigate("ServicesModal")} >
+                  Open Modal
+                </Button>
                 <InputField
                   label="Account Name"
                   placeHolder="How you identify this account?"
