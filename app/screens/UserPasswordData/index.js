@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Alert } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { Formik } from 'formik';
 import { object, string } from 'yup';
@@ -24,9 +25,41 @@ function UserPasswordData({ route, navigation }) {
 
   const { passwordId, action } = route.params;
   const [formMode, setFormMode] = useState(action);
-  const [showModal, setShowModal] = useState(false);
-  const hasUnsavedChanges = false;
+  const [modalServicesIsOpen, setModalServicesIsOpen] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const successToast = useToast();
+
+  // const cancelRef = useRef(null);
+  // const [preventBackDialogIsOpen, setPreventBackDialogIsOpen] = useState(false);
+  // var hasUnsavedChanges = false;
+  useEffect(() => navigation.addListener(
+    'beforeRemove', e => {
+      console.log("Prevent", hasUnsavedChanges);
+      const action = e.data.action;
+      if (formMode === "view") {
+        return
+      } else {
+        if (!hasUnsavedChanges) {
+          // If we don't have unsaved changes, then we don't need to do anything
+          return;
+        }
+        e.preventDefault();
+        // setPreventBackDialogIsOpen(true);
+        Alert.alert(
+          'Discard changes?',
+          'You have unsaved changes. Are you sure to discard them and go back?',
+          [
+            { text: "Don't leave", style: 'cancel', onPress: () => { } },
+            {
+              text: 'Discard',
+              style: 'destructive',
+              onPress: () => navigation.dispatch(action),
+            },
+          ]
+        );
+      }
+    }
+  ), [hasUnsavedChanges, navigation]);
 
   var register = vault.registerById(passwordId)
   var formInitialValues = {
@@ -89,7 +122,7 @@ function UserPasswordData({ route, navigation }) {
   }
 
   return (
-    <Box flex="1" bg="white">
+    <Box flex="1" >
       <ScrollView keyboardShouldPersistTaps="always">
         <Box px="15%">
           <Formik
@@ -97,7 +130,7 @@ function UserPasswordData({ route, navigation }) {
             validationSchema={formSchema}
             onSubmit={values => submitForm(values)}
           >
-            {({ handleChange, handleBlur, handleSubmit, values, setValues, isSubmitting, errors, touched }) => (
+            {({ handleChange, handleBlur, handleSubmit, values, setValues, isSubmitting, errors, touched, dirty }) => (
               <VStack maxWidth="300px">
                 <Avatar
                   bg="primary.600"
@@ -120,6 +153,7 @@ function UserPasswordData({ route, navigation }) {
                   onBlur={handleBlur("accountName")}
                   error={errors.accountName}
                   touched={touched.accountName}
+                  hasChanged={setHasUnsavedChanges}
                   rightElement={(formMode !== "view" ? true : false) &&
                     <Button variant="ghost" onPress={() => navigation.navigate("ServicesModal", { values: values, setValues: setValues })} >
                       Select from list
@@ -172,14 +206,14 @@ function UserPasswordData({ route, navigation }) {
                   leftElement={(formMode == "view" ? false : true) &&
                     <Button
                       variant="outline"
-                      onPress={() => setShowModal(true)}
+                      onPress={() => setModalServicesIsOpen(true)}
                     >
                       {values.category ? "Change category" : "Select category"}
                     </Button>
                   }
                   borderWidth="0"
                 />
-                <ModalCategories isOpen={showModal} setShowModal={setShowModal} />
+                <ModalCategories isOpen={modalServicesIsOpen} setShowModal={setModalServicesIsOpen} />
                 {
                   (formMode != "view") &&
                   <Button mt={10} onPress={handleSubmit} isLoading={isSubmitting} isLoadingText="PROTECTING DATA">
@@ -191,6 +225,30 @@ function UserPasswordData({ route, navigation }) {
           </Formik>
         </Box>
       </ScrollView>
+      {/* <AlertDialog
+        isOpen={preventBackDialogIsOpen}
+        motionPreset="fade"
+        leastDestructiveRef={cancelRef}
+      >
+        <AlertDialog.Content>
+          <AlertDialog.Header fontSize="lg" fontWeight="bold">
+            Discard changes?
+          </AlertDialog.Header>
+          <AlertDialog.Body>
+            'You have unsaved changes. Are you sure to discard them and leave the screen?'
+          </AlertDialog.Body>
+          <AlertDialog.Footer>
+            <Button onPress={() => setPreventBackDialogIsOpen(false)} ref={cancelRef}>
+              Don't leave
+            </Button>
+            {/* If the user confirmed, then we dispatch the action we blocked earlier
+            This will continue the action that had triggered the removal of the screen */}
+      {/* <Button colorScheme="red" ml="3" onPress={() => navigation.dispatch(e.data.action)}>
+              Discard
+            </Button>
+          </AlertDialog.Footer>
+        </AlertDialog.Content>
+      </AlertDialog> */}
     </Box>
   )
 }
