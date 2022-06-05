@@ -2,21 +2,11 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import * as Clipboard from 'expo-clipboard';
 import { useFormikContext, useField } from 'formik';
-import { Box, FormControl, HStack, Icon, IconButton, Input, Text, Toast, useToast } from 'native-base';
+import { Box, FormControl, HStack, Icon, IconButton, Input, Text, useToast } from 'native-base';
 import { FontAwesome } from '@expo/vector-icons';
 
 import PasswordStrengthBar from './PasswordStrengthBar';
-import { getPasswordEntrophy } from '../../../utils/passwordEntrophyCalculator';
-
-const getSecurityStatusMessage = passwordEntrophy => {
-  var message;
-  (passwordEntrophy <= 25) ? message = "Extremely weak"
-    : (passwordEntrophy <= 50) ? message = "Very week"
-      : (passwordEntrophy <= 70) ? message = "Not so strong"
-        : (passwordEntrophy <= 90) ? message = "Strong"
-          : (passwordEntrophy > 90) && (message = "Super strong")
-  return message
-}
+import { getPasswordEntropy, getSecurityStatusMessage } from '../../../utils/passwordEntropyCalculator';
 
 function PasswordInputField({
   label,
@@ -32,7 +22,7 @@ function PasswordInputField({
   useEffect(() => {
     // console.log(field.name, " isInitial: ", meta.initialValue === field.value);
     // console.log("dirty:", dirty);
-    setValues({ ...values, passwordStrength: getPasswordEntrophy(field.value) });
+    setValues({ ...values, passwordStrength: getPasswordEntropy(field.value) });
     hasChanged(dirty);
   }, [field.value]);
 
