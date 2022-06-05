@@ -1,4 +1,4 @@
-export const getPasswordEntrophy = password => {
+export const getPasswordEntropy = password => {
   var poolSizePassword = 0;
   const lengthPassword = password ? password.length : 0;
   const poolSizes = {
