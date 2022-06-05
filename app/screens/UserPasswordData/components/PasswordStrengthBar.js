@@ -12,10 +12,7 @@ const setColorBar = value => {
   return colorScheme;
 }
 
-const PasswordStrengthBar = ({
-  value,
-  ...props }
-) => {
+function PasswordStrengthBar({ value, ...props }) {
   return (
     <Box mx={2}>
       <Progress
