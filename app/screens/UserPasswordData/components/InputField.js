@@ -1,15 +1,27 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { useField, useFormikContext } from 'formik';
 import { FormControl, HStack, Input } from 'native-base';
 
 function InputField({
   label,
-  placeHolder,
   viewMode,
+  hasChanged,
   ...props
 }) {
+  const [field, meta] = useField(props);
+  const { dirty } = useFormikContext();
+
+  useEffect(() => {
+    // console.log(meta.initialValue, field.value, meta.initialValue === field.value);
+    // console.log(field.name, " isInitial: ", meta.initialValue === field.value);
+    // console.log("dirty:", dirty);
+    // (meta.initialValue !== field.value || !dirty) && hasChanged(dirty);
+    hasChanged(dirty)
+  }, [field.value]);
+
   return (
-    <FormControl isDisabled={viewMode} isInvalid={props.touched && props.error && true}>
+    <FormControl isDisabled={viewMode} isInvalid={meta.touched && meta.error && true}>
       <HStack space="1">
         <FormControl.Label
           flex="1"
@@ -19,11 +31,10 @@ function InputField({
         >
           {label}
         </FormControl.Label>
-        <FormControl.ErrorMessage>{props.error}</FormControl.ErrorMessage>
+        <FormControl.ErrorMessage>{meta.error}</FormControl.ErrorMessage>
       </HStack>
       <Input
         p={2}
-        placeholder={placeHolder}
         borderWidth={(viewMode) ? "0" : "1"}
         {...props}
       />
@@ -34,8 +45,8 @@ function InputField({
 
 InputField.propTypes = {
   label: PropTypes.string.isRequired,
-  placeHolder: PropTypes.string,
-  viewMode: PropTypes.bool.isRequired
+  viewMode: PropTypes.bool.isRequired,
+  hasChanged: PropTypes.func.isRequired
 }
 
 export default InputField

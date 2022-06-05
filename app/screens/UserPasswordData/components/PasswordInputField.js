@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import * as Clipboard from 'expo-clipboard';
-import { useFormikContext } from 'formik';
+import { useFormikContext, useField } from 'formik';
 import { Box, FormControl, HStack, Icon, IconButton, Input, Text } from 'native-base';
 import { FontAwesome } from '@expo/vector-icons';
 
@@ -20,17 +20,21 @@ const getSecurityStatusMessage = passwordEntrophy => {
 
 function PasswordInputField({
   label,
-  placeholder,
   viewMode,
+  hasChanged,
   hasPasswordChecker = false,
   ...props
 }) {
   const [showPassword, setShowPassword] = useState(false);
-  const { values, setValues } = useFormikContext();
+  const [field, meta] = useField(props);
+  const { values, setValues, dirty } = useFormikContext();
 
   useEffect(() => {
-    setValues({ ...values, passwordStrength: getPasswordEntrophy(props.value) });
-  }, [props.value])
+    // console.log(field.name, " isInitial: ", meta.initialValue === field.value);
+    // console.log("dirty:", dirty);
+    setValues({ ...values, passwordStrength: getPasswordEntrophy(field.value) });
+    hasChanged(dirty);
+  }, [field.value]);
 
   useEffect(() => {
     setShowPassword(false);
@@ -41,7 +45,7 @@ function PasswordInputField({
   };
 
   return (
-    <FormControl isDisabled={viewMode} isInvalid={props.touched && props.error && true}>
+    <FormControl isDisabled={viewMode} isInvalid={meta.touched && meta.error && true}>
       <HStack space="1">
         <FormControl.Label
           flex="1"
@@ -51,7 +55,7 @@ function PasswordInputField({
         >
           Password
         </FormControl.Label>
-        <FormControl.ErrorMessage>{props.error}</FormControl.ErrorMessage>
+        <FormControl.ErrorMessage>{meta.error}</FormControl.ErrorMessage>
       </HStack>
       <Input
         p={2}
@@ -74,7 +78,7 @@ function PasswordInputField({
               <IconButton
                 icon={<Icon as={FontAwesome} name="copy" />}
                 borderRadius="full"
-                onPress={() => copyToClipboard(values.password)}
+                onPress={() => copyToClipboard(field.value)}
               />
               // :
               // <Button
@@ -102,8 +106,8 @@ function PasswordInputField({
 
 PasswordInputField.propTypes = {
   label: PropTypes.string.isRequired,
-  placeholder: PropTypes.string,
   viewMode: PropTypes.bool.isRequired,
+  hasChanged: PropTypes.func.isRequired,
   hasPasswordChecker: PropTypes.bool
 }
 
