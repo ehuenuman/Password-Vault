@@ -18,7 +18,7 @@ function ModalCategories({
   setShowModal
 }) {
 
-  const { values, setFieldTouched } = useFormikContext();
+  const { values, setValues, setFieldTouched } = useFormikContext();
 
   return (
     <Center>
@@ -41,6 +41,7 @@ function ModalCategories({
                       key={index}
                       onPress={() => {
                         values.category = category
+                        setValues({ ...values, category: category })
                         setFieldTouched("category", true);
                         setShowModal(false);
                       }}
