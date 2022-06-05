@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import * as Clipboard from 'expo-clipboard';
 import { useFormikContext, useField } from 'formik';
-import { Box, FormControl, HStack, Icon, IconButton, Input, Text } from 'native-base';
+import { Box, FormControl, HStack, Icon, IconButton, Input, Text, Toast, useToast } from 'native-base';
 import { FontAwesome } from '@expo/vector-icons';
 
 import PasswordStrengthBar from './PasswordStrengthBar';
@@ -40,8 +40,12 @@ function PasswordInputField({
     setShowPassword(false);
   }, [viewMode]);
 
+  const toast = useToast();
   const copyToClipboard = async (text) => {
     await Clipboard.setStringAsync(text);
+    toast.show({
+      description: "Password copied"
+    });
   };
 
   return (
@@ -53,7 +57,7 @@ function PasswordInputField({
             textTransform: "uppercase"
           }}
         >
-          Password
+          {label}
         </FormControl.Label>
         <FormControl.ErrorMessage>{meta.error}</FormControl.ErrorMessage>
       </HStack>

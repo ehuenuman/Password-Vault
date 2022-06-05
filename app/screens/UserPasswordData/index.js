@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { Formik } from 'formik';
@@ -26,7 +26,7 @@ function UserPasswordData({ route, navigation }) {
   const [formMode, setFormMode] = useState(action);
   const [modalCategoriesIsOpen, setModalCategoriesIsOpen] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const successToast = useToast();
+  const toast = useToast();
 
   useEffect(() => navigation.addListener(
     'beforeRemove', e => {
@@ -69,6 +69,9 @@ function UserPasswordData({ route, navigation }) {
 
   const copyToClipboard = async (text) => {
     await Clipboard.setStringAsync(text);
+    toast.show({
+      description: "User copied"
+    });
   };
 
   let formSchema = object({
@@ -107,7 +110,7 @@ function UserPasswordData({ route, navigation }) {
         .then(
           (message) => {
             setFormMode("view");
-            successToast.show({
+            toast.show({
               description: "Password Saved"
             });
           },
