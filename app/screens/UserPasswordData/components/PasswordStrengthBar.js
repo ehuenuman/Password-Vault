@@ -4,10 +4,10 @@ import { Box, Progress, Text } from 'native-base';
 
 const setColorBar = value => {
   let colorScheme;
-  (value <= 30) ? colorScheme = "danger"
-    : (value <= 50) ? colorScheme = "warning"
-      : (value <= 80) ? colorScheme = "emerald"
-        : (value > 80) && (colorScheme = "success")
+  (value <= 50) ? colorScheme = "danger"
+    : (value <= 70) ? colorScheme = "warning"
+      : (value <= 90) ? colorScheme = "emerald"
+        : (value > 90) && (colorScheme = "success")
 
   return colorScheme;
 }

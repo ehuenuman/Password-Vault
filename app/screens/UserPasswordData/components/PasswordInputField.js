@@ -13,7 +13,7 @@ const getSecurityStatusMessage = passwordEntrophy => {
   (passwordEntrophy <= 25) ? message = "Extremely weak"
     : (passwordEntrophy <= 50) ? message = "Very week"
       : (passwordEntrophy <= 70) ? message = "Not so strong"
-        : (passwordEntrophy <= 85) ? message = "Strong"
+        : (passwordEntrophy <= 90) ? message = "Strong"
           : (passwordEntrophy > 90) && (message = "Super strong")
   return message
 }
@@ -28,6 +28,8 @@ function PasswordInputField({
   const [showPassword, setShowPassword] = useState(false);
   const [field, meta] = useField(props);
   const { values, setValues, dirty } = useFormikContext();
+
+  console.log(values.passwordStrength);
 
   useEffect(() => {
     // console.log(field.name, " isInitial: ", meta.initialValue === field.value);
