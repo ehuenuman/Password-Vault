@@ -4,7 +4,6 @@ import * as Clipboard from 'expo-clipboard';
 import { Formik } from 'formik';
 import { object, string } from 'yup';
 import {
-  AlertDialog,
   Avatar,
   Box,
   Button,
@@ -25,16 +24,12 @@ function UserPasswordData({ route, navigation }) {
 
   const { passwordId, action } = route.params;
   const [formMode, setFormMode] = useState(action);
-  const [modalServicesIsOpen, setModalServicesIsOpen] = useState(false);
+  const [modalCategoriesIsOpen, setModalCategoriesIsOpen] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const successToast = useToast();
 
-  // const cancelRef = useRef(null);
-  // const [preventBackDialogIsOpen, setPreventBackDialogIsOpen] = useState(false);
-  // var hasUnsavedChanges = false;
   useEffect(() => navigation.addListener(
     'beforeRemove', e => {
-      console.log("Prevent", hasUnsavedChanges);
       const action = e.data.action;
       if (formMode === "view") {
         return
@@ -44,7 +39,7 @@ function UserPasswordData({ route, navigation }) {
           return;
         }
         e.preventDefault();
-        // setPreventBackDialogIsOpen(true);
+
         Alert.alert(
           'Discard changes?',
           'You have unsaved changes. Are you sure to discard them and go back?',
@@ -130,7 +125,7 @@ function UserPasswordData({ route, navigation }) {
             validationSchema={formSchema}
             onSubmit={values => submitForm(values)}
           >
-            {({ handleChange, handleBlur, handleSubmit, values, setValues, isSubmitting, errors, touched, dirty }) => (
+            {({ handleChange, handleBlur, handleSubmit, values, setValues, isSubmitting }) => (
               <VStack maxWidth="300px">
                 <Avatar
                   bg="primary.600"
@@ -145,14 +140,13 @@ function UserPasswordData({ route, navigation }) {
                   {values.accountName.toUpperCase().slice(0, 2)}
                 </Avatar>
                 <InputField
+                  name="accountName"
                   label="Account Name"
-                  placeHolder="How you identify this account?"
+                  placeholder="How you identify this account?"
                   viewMode={formMode == "view" ? true : false}
                   value={values.accountName}
                   onChangeText={handleChange("accountName")}
                   onBlur={handleBlur("accountName")}
-                  error={errors.accountName}
-                  touched={touched.accountName}
                   hasChanged={setHasUnsavedChanges}
                   rightElement={(formMode !== "view" ? true : false) &&
                     <Button variant="ghost" onPress={() => navigation.navigate("ServicesModal", { values: values, setValues: setValues })} >
@@ -161,23 +155,23 @@ function UserPasswordData({ route, navigation }) {
                   }
                 />
                 <InputField
+                  name="website"
                   label="Website"
                   placeholder="Where you go to do login?"
                   viewMode={formMode == "view" ? true : false}
                   value={values.website}
                   onChangeText={handleChange("website")}
                   onBlur={handleBlur("website")}
-                  error={errors.website}
-                  touched={touched.website}
+                  hasChanged={setHasUnsavedChanges}
                 />
                 <InputField
+                  name="user"
                   label="User"
                   value={values.user}
                   viewMode={formMode == "view" ? true : false}
                   onChangeText={handleChange("user")}
                   onBlur={handleBlur("user")}
-                  error={errors.user}
-                  touched={touched.user}
+                  hasChanged={setHasUnsavedChanges}
                   rightElement={(formMode == "view" ? true : false) &&
                     <IconButton
                       icon={<Icon as={FontAwesome} name="copy" />}
@@ -187,33 +181,33 @@ function UserPasswordData({ route, navigation }) {
                   }
                 />
                 <PasswordInputField
+                  name="password"
                   label="Password"
                   value={values.password}
                   viewMode={formMode == "view" ? true : false}
-                  hasPasswordChecker={true}
                   onChangeText={handleChange("password")}
                   onBlur={handleBlur("password")}
-                  error={errors.password}
-                  touched={touched.password}
+                  hasChanged={setHasUnsavedChanges}
+                  hasPasswordChecker={true}
                 />
                 <InputField
-                  isDisabled={true}
+                  name="category"
                   label="Category"
                   value={values.category}
-                  error={errors.category}
-                  touched={touched.category}
                   viewMode={formMode == "view" ? true : false}
+                  isDisabled={true}
+                  hasChanged={setHasUnsavedChanges}
                   leftElement={(formMode == "view" ? false : true) &&
                     <Button
                       variant="outline"
-                      onPress={() => setModalServicesIsOpen(true)}
+                      onPress={() => setModalCategoriesIsOpen(true)}
                     >
                       {values.category ? "Change category" : "Select category"}
                     </Button>
                   }
                   borderWidth="0"
                 />
-                <ModalCategories isOpen={modalServicesIsOpen} setShowModal={setModalServicesIsOpen} />
+                <ModalCategories isOpen={modalCategoriesIsOpen} setShowModal={setModalCategoriesIsOpen} />
                 {
                   (formMode != "view") &&
                   <Button mt={10} onPress={handleSubmit} isLoading={isSubmitting} isLoadingText="PROTECTING DATA">
@@ -225,30 +219,6 @@ function UserPasswordData({ route, navigation }) {
           </Formik>
         </Box>
       </ScrollView>
-      {/* <AlertDialog
-        isOpen={preventBackDialogIsOpen}
-        motionPreset="fade"
-        leastDestructiveRef={cancelRef}
-      >
-        <AlertDialog.Content>
-          <AlertDialog.Header fontSize="lg" fontWeight="bold">
-            Discard changes?
-          </AlertDialog.Header>
-          <AlertDialog.Body>
-            'You have unsaved changes. Are you sure to discard them and leave the screen?'
-          </AlertDialog.Body>
-          <AlertDialog.Footer>
-            <Button onPress={() => setPreventBackDialogIsOpen(false)} ref={cancelRef}>
-              Don't leave
-            </Button>
-            {/* If the user confirmed, then we dispatch the action we blocked earlier
-            This will continue the action that had triggered the removal of the screen */}
-      {/* <Button colorScheme="red" ml="3" onPress={() => navigation.dispatch(e.data.action)}>
-              Discard
-            </Button>
-          </AlertDialog.Footer>
-        </AlertDialog.Content>
-      </AlertDialog> */}
     </Box>
   )
 }
