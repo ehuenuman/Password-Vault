@@ -1,57 +1,59 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import * as Clipboard from 'expo-clipboard';
-import { useFormikContext } from 'formik';
-import { Box, FormControl, Icon, IconButton, Input, Text } from 'native-base';
+import { useFormikContext, useField } from 'formik';
+import { Box, FormControl, HStack, Icon, IconButton, Input, Text, useToast } from 'native-base';
 import { FontAwesome } from '@expo/vector-icons';
 
 import PasswordStrengthBar from './PasswordStrengthBar';
-import { getPasswordEntrophy } from '../../../utils/passwordEntrophyCalculator';
-
-const getSecurityStatusMessage = passwordEntrophy => {
-  var message;
-  (passwordEntrophy <= 25) ? message = "Extremely weak"
-    : (passwordEntrophy <= 50) ? message = "Very week"
-      : (passwordEntrophy <= 70) ? message = "Not so strong"
-        : (passwordEntrophy <= 85) ? message = "Strong"
-          : (passwordEntrophy > 90) && (message = "Super strong")
-  return message
-}
+import { getPasswordEntropy, getSecurityStatusMessage } from '../../../utils/passwordEntropyCalculator';
 
 function PasswordInputField({
   label,
-  placeholder,
-  viewMode,
+  isViewMode,
+  hasChanged,
   hasPasswordChecker = false,
   ...props
 }) {
   const [showPassword, setShowPassword] = useState(false);
-  const { values, setValues } = useFormikContext();
+  const [field, meta] = useField(props);
+  const { values, setValues, dirty } = useFormikContext();
 
   useEffect(() => {
-    setValues({ ...values, passwordStrength: getPasswordEntrophy(props.value) });
-  }, [props.value])
+    // console.log(field.name, " isInitial: ", meta.initialValue === field.value);
+    // console.log("dirty:", dirty);
+    setValues({ ...values, passwordStrength: getPasswordEntropy(field.value) });
+    hasChanged(dirty);
+  }, [field.value]);
 
   useEffect(() => {
     setShowPassword(false);
-  }, [viewMode]);
+  }, [isViewMode]);
 
+  const toast = useToast();
   const copyToClipboard = async (text) => {
     await Clipboard.setStringAsync(text);
+    toast.show({
+      description: "Password copied"
+    });
   };
 
   return (
-    <FormControl isDisabled={viewMode}>
-      <FormControl.Label
-        _text={{
-          textTransform: "uppercase"
-        }}
-      >
-        Password
-      </FormControl.Label>
+    <FormControl isDisabled={isViewMode} isInvalid={meta.touched && meta.error && true}>
+      <HStack space="1">
+        <FormControl.Label
+          flex="1"
+          _text={{
+            textTransform: "uppercase"
+          }}
+        >
+          {label}
+        </FormControl.Label>
+        <FormControl.ErrorMessage>{meta.error}</FormControl.ErrorMessage>
+      </HStack>
       <Input
         p={2}
-        borderWidth={(viewMode) ? "0" : "1"}
+        borderWidth={(isViewMode) ? "0" : "1"}
         type={showPassword ? "text" : "password"}
         {...props}
         rightElement={
@@ -65,12 +67,12 @@ function PasswordInputField({
                 setShowPassword(!showPassword)
               }}
             />
-            {/* {(viewMode) ? */}
-            {(viewMode) &&
+            {/* {(isViewMode) ? */}
+            {(isViewMode) &&
               <IconButton
                 icon={<Icon as={FontAwesome} name="copy" />}
                 borderRadius="full"
-                onPress={() => copyToClipboard(values.password)}
+                onPress={() => copyToClipboard(field.value)}
               />
               // :
               // <Button
@@ -82,16 +84,14 @@ function PasswordInputField({
           </Box>
         }
       />
-      {(viewMode) &&
-        <FormControl.HelperText
-          alignItems="flex-end"
-        >
+      {(isViewMode) &&
+        <FormControl.HelperText alignItems="flex-end">
           <Text>
             Security Status: {getSecurityStatusMessage(values.passwordStrength)}
           </Text>
         </FormControl.HelperText>}
       {
-        (!viewMode) && (hasPasswordChecker) &&
+        (!isViewMode) && (hasPasswordChecker) &&
         <PasswordStrengthBar value={values.passwordStrength} />
       }
     </FormControl>
@@ -100,8 +100,8 @@ function PasswordInputField({
 
 PasswordInputField.propTypes = {
   label: PropTypes.string.isRequired,
-  placeholder: PropTypes.string,
-  viewMode: PropTypes.bool.isRequired,
+  isViewMode: PropTypes.bool.isRequired,
+  hasChanged: PropTypes.func.isRequired,
   hasPasswordChecker: PropTypes.bool
 }
 

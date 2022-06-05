@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { NativeBaseProvider, extendTheme, Box, Image, Center } from 'native-base';
+import { CardStyleInterpolators, createStackNavigator } from '@react-navigation/stack';
+import { NativeBaseProvider, Box, Image, Center, Icon } from 'native-base';
 
 import PasswordsList from './app/screens/PasswordsList';
 import UserPasswordData from './app/screens/UserPasswordData';
@@ -45,7 +45,7 @@ export default function App() {
     return null;
   }
 
-  const Stack = createNativeStackNavigator();
+  const Stack = createStackNavigator();
 
   return (
     <NativeBaseProvider theme={theme}>
@@ -54,16 +54,17 @@ export default function App() {
           <Stack.Navigator
             initialRouteName="Home"
             screenOptions={{
-              headerTitle: (props) => <Center><Image source={require("./app/assets/favicon.png")} alt="Password Vault" size="25px" /></Center>,
+              headerTitle: (props) => <Center {...props}><Image source={require("./app/assets/favicon.png")} alt="Password Vault" size="25px" /></Center>,
               headerTitleAlign: "center",
-              headerTintColor: theme.colors.primary[600]
+              headerTintColor: theme.colors.primary[600],
+              cardStyle: { backgroundColor: 'white' }
             }}
           >
-            <Stack.Group screenOptions={{ animation: "slide_from_right" }}>
+            <Stack.Group screenOptions={{ cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS }}>
               <Stack.Screen name="Home" component={PasswordsList} initialParams={{ decryptedData: decryptedData }} />
               <Stack.Screen name="UserPasswordData" component={UserPasswordData} initialParams={{ passwordId: "", action: "new" }} />
             </Stack.Group>
-            <Stack.Group screenOptions={{ animation: "slide_from_bottom", presentation: "modal" }}>
+            <Stack.Group screenOptions={{ presentation: "modal" }}>
               <Stack.Screen name="ServicesModal" component={ModalSelectService} initialParams={{ services: websites }} options={{ headerTitle: "Select a Service" }} />
             </Stack.Group>
           </Stack.Navigator>

@@ -1,4 +1,10 @@
-export const getPasswordEntrophy = password => {
+/**
+ * Get the numeric value of the password entropy using the amount of characters and Log base 2.
+ * More info: https://en.wikipedia.org/wiki/Password_strength
+ * @param {string} password User's password
+ * @returns Password Entropy
+ */
+export const getPasswordEntropy = password => {
   var poolSizePassword = 0;
   const lengthPassword = password ? password.length : 0;
   const poolSizes = {
@@ -28,4 +34,20 @@ export const getPasswordEntrophy = password => {
   } else {
     return 0
   }
+}
+
+/**
+ * Get a personalised message depending on the password entropy value.
+ * @param {number} passwordEntropy 
+ * @returns Message indentifying with words the password strength.
+ * It could be any of the follows Extremely weak | Very weak | Not so strong | Strong | Super strong.
+ */
+export const getSecurityStatusMessage = passwordEntropy => {
+  var message;
+  (passwordEntropy <= 25) ? message = "Extremely weak"
+    : (passwordEntropy <= 50) ? message = "Very week"
+      : (passwordEntropy <= 70) ? message = "Not so strong"
+        : (passwordEntropy <= 90) ? message = "Strong"
+          : (passwordEntropy > 90) && (message = "Super strong")
+  return message
 }
