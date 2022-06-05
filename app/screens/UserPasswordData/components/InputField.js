@@ -5,7 +5,7 @@ import { FormControl, HStack, Input } from 'native-base';
 
 function InputField({
   label,
-  viewMode,
+  isViewMode,
   hasChanged,
   ...props
 }) {
@@ -21,7 +21,7 @@ function InputField({
   }, [field.value]);
 
   return (
-    <FormControl isDisabled={viewMode} isInvalid={meta.touched && meta.error && true}>
+    <FormControl isDisabled={isViewMode} isInvalid={meta.touched && meta.error && true}>
       <HStack space="1">
         <FormControl.Label
           flex="1"
@@ -35,7 +35,7 @@ function InputField({
       </HStack>
       <Input
         p={2}
-        borderWidth={(viewMode) ? "0" : "1"}
+        borderWidth={(isViewMode) ? "0" : "1"}
         {...props}
       />
       {/* <FormControl.HelperText></FormControl.HelperText> */}
@@ -45,7 +45,7 @@ function InputField({
 
 InputField.propTypes = {
   label: PropTypes.string.isRequired,
-  viewMode: PropTypes.bool.isRequired,
+  isViewMode: PropTypes.bool.isRequired,
   hasChanged: PropTypes.func.isRequired
 }
 

@@ -146,7 +146,7 @@ function UserPasswordData({ route, navigation }) {
                   name="accountName"
                   label="Account Name"
                   placeholder="How you identify this account?"
-                  viewMode={formMode == "view" ? true : false}
+                  isViewMode={formMode == "view" ? true : false}
                   value={values.accountName}
                   onChangeText={handleChange("accountName")}
                   onBlur={handleBlur("accountName")}
@@ -161,7 +161,7 @@ function UserPasswordData({ route, navigation }) {
                   name="website"
                   label="Website"
                   placeholder="Where you go to do login?"
-                  viewMode={formMode == "view" ? true : false}
+                  isViewMode={formMode == "view" ? true : false}
                   value={values.website}
                   onChangeText={handleChange("website")}
                   onBlur={handleBlur("website")}
@@ -171,7 +171,7 @@ function UserPasswordData({ route, navigation }) {
                   name="user"
                   label="User"
                   value={values.user}
-                  viewMode={formMode == "view" ? true : false}
+                  isViewMode={formMode == "view" ? true : false}
                   onChangeText={handleChange("user")}
                   onBlur={handleBlur("user")}
                   hasChanged={setHasUnsavedChanges}
@@ -187,7 +187,7 @@ function UserPasswordData({ route, navigation }) {
                   name="password"
                   label="Password"
                   value={values.password}
-                  viewMode={formMode == "view" ? true : false}
+                  isViewMode={formMode == "view" ? true : false}
                   onChangeText={handleChange("password")}
                   onBlur={handleBlur("password")}
                   hasChanged={setHasUnsavedChanges}
@@ -197,7 +197,7 @@ function UserPasswordData({ route, navigation }) {
                   name="category"
                   label="Category"
                   value={values.category}
-                  viewMode={formMode == "view" ? true : false}
+                  isViewMode={formMode == "view" ? true : false}
                   isDisabled={true}
                   hasChanged={setHasUnsavedChanges}
                   leftElement={(formMode == "view" ? false : true) &&
