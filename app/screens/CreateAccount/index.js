@@ -1,152 +1,124 @@
-import React, { useState } from "react";
-import { Formik, useFormikContext } from "formik";
+import React, { useEffect, useState } from "react";
+import { Formik } from "formik";
+import { object, string, ref } from "yup";
 import {
   Box,
   Button,
-  Checkbox,
-  Center,
-  FormControl,
-  Input,
-  Slider,
+  ScrollView,
   Text,
   VStack,
-  IconButton,
-  Icon,
 } from 'native-base';
-import { FontAwesome } from "@expo/vector-icons"
 
-import ConfirmPassInput from "./components/ConfirmPassInput";
+import InputField from "../UserPasswordData/components/InputField";
+import PasswordInputField from "../UserPasswordData/components/PasswordInputField";
 
-function CreateAccount() {
+function CreateAccount({ route, navigation }) {
 
-  const [showPassword, setShowPassword] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  useEffect(() => navigation.addListener(
+    'beforeRemove', e => {
+      const action = e.data.action;
+      if (formMode === "view") {
+        return
+      } else {
+        if (!hasUnsavedChanges) {
+          // If we don't have unsaved changes, then we don't need to do anything
+          return;
+        }
+        e.preventDefault();
+
+        Alert.alert(
+          'Discard changes?',
+          'You have unsaved changes. Are you sure to discard them and go back?',
+          [
+            { text: "Don't leave", style: 'cancel', onPress: () => { } },
+            {
+              text: 'Discard',
+              style: 'destructive',
+              onPress: () => navigation.dispatch(action),
+            },
+          ]
+        );
+      }
+    }
+  ), [hasUnsavedChanges, navigation]);
+
+  const submitForm = values => {
+    console.log(values);
+  }
+
+  let formSchema = object({
+    userName: string().required("Required field"),
+    email: string().email("Write a valid email").required("Required field"),
+    masterPassword: string().required("Required field"),
+    masterPassword2: string().required("Required field").oneOf([ref('masterPassword'), null], "Passwords must match")
+  });
 
   return (
-    <Center
-      flex={1}
-    >
-      <Box
-        maxWidth={300}
-      >
+    <Box flex="1" justifyContent="center" alignItems="center">
+      <Box px="15%">
         <Formik
           initialValues={{
-            name: "",
+            userName: "",
             email: "",
             masterPassword: "",
-            passwordStrength: 50,
-            passwordConditions: [],
-            masterPassword2: ''
+            passwordStrength: 0,
+            masterPassword2: ""
           }}
-          onSubmit={values => console.log(values)}
+          validationSchema={formSchema}
+          onSubmit={values => submitForm(values)}
         >
-          {({ handleSubmit, handleBlur, handleChange, values, errors }) => (
-            <Box>
-              <Box>
-                <FormControl >
-                  <FormControl.Label>NAME</FormControl.Label>
-                  <Input
-                    onChangeText={handleChange("name")}
-                    onBlur={handleBlur("name")}
-                    value={values.name}
-                  />
-                </FormControl>
-                <FormControl >
-                  <FormControl.Label>EMAIL</FormControl.Label>
-                  <Input
-                    onChangeText={handleChange("email")}
-                    onBlur={handleBlur("email")}
-                    value={values.email}
-                  />
-                </FormControl>
-                <FormControl >
-                  <FormControl.Label>MASTER PASSWORD</FormControl.Label>
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    onChangeText={handleChange("masterPassword")}
-                    onBlur={handleBlur("masterPassword")}
-                    value={values.masterPassword}
-                    rightElement={
-                      <IconButton
-                        icon={<Icon as={FontAwesome} name={showPassword ? "eye-slash" : "eye"} />}
-                        borderRadius="full"
-                        onPress={() => {
-                          setShowPassword(!showPassword)
-                        }}
-                      />
-                    }
-                  />
-                </FormControl>
-                <Box m={2}>
-                  <Box marginBottom="3">
-                    <Slider
-                      defaultValue={values.passwordStrength}
-                      maxValue={100}
-                      step={1}
-                      marginBottom="-2"
-                      isDisabled
-                    >
-                      <Slider.Track >
-                        <Slider.FilledTrack />
-                      </Slider.Track>
-                    </Slider>
-                    <Box
-                      flexDirection="row"
-                      justifyContent="space-between"
-                      px={2}
-                    >
-                      <Text fontSize="xs">Low</Text>
-                      <Text fontSize="xs">High</Text>
-                    </Box>
-                  </Box>
-                  <Checkbox.Group
-                    flexDir="row"
-                    alignSelf="center"
-                    size="sm"
-                    px={2}
-                    defaultValue={values.passwordConditions}
-                    onChange={handleChange("passwordConditions")}
-                  >
-                    <Checkbox isDisabled size="sm" value="Numbers" mr={2} _text={{ textTransform: "uppercase", fontSize: "xs", marginLeft: "0" }}>
-                      Numbers
-                    </Checkbox>
-                    <Checkbox isDisabled size="sm" value="Letters" mr={2} _text={{ textTransform: "uppercase", fontSize: "xs", marginLeft: "0" }}>
-                      Letters
-                    </Checkbox>
-                    <Checkbox isDisabled size="sm" value="Symbols" _text={{ textTransform: "uppercase", fontSize: "xs", marginLeft: "0" }}>
-                      Symbols
-                    </Checkbox>
-                  </Checkbox.Group>
-                </Box>
-                <ConfirmPassInput
-                  name="masterPassword2"
-                  label="CONFIRM PASSWORD"
-                  type={showPassword ? "text" : "password"}
-                  // onChangeText={handleChange("masterPassword2")}
-                  // onBlur={handleBlur("masterPassword2")}
-                  value={values.masterPassword2}
-                  showPassword={showPassword}
-                  setShowPassword={setShowPassword}
+          {({ handleSubmit, handleBlur, handleChange, values, setFieldError }) => (
+            <VStack maxWidth="300px" space="24">
+              <VStack>
+                <InputField
+                  name="userName"
+                  label="Name"
+                  onChangeText={handleChange("userName")}
+                  onBlur={handleBlur("userName")}
+                  value={values.userName}
+                  hasChanged={setHasUnsavedChanges}
                 />
-              </Box>
-              <VStack
-                space={2}
-                mt={16}
-              >
+                <InputField
+                  name="email"
+                  label="Email"
+                  onChangeText={handleChange("email")}
+                  onBlur={handleBlur("email")}
+                  value={values.email}
+                  hasChanged={setHasUnsavedChanges}
+                />
+                <PasswordInputField
+                  name="masterPassword"
+                  label="Master Password"
+                  onChangeText={handleChange("masterPassword")}
+                  onBlur={handleBlur("masterPassword")}
+                  value={values.masterPassword}
+                  hasPasswordChecker={true}
+                  hasChanged={setHasUnsavedChanges}
+                />
+                <PasswordInputField
+                  name="masterPassword2"
+                  label="Confirm Master Password"
+                  onChangeText={handleChange("masterPassword2")}
+                  onBlur={handleBlur("masterPassword2")}
+                  value={values.masterPassword2}
+                  hasChanged={setHasUnsavedChanges}
+                />
+              </VStack>
+              <VStack space="2">
                 <Text textAlign="center">
                   Clicking on continue button you are accepting our terms and conditions.
                 </Text>
-                <Button
-                  colorScheme="primary"
-                  onPress={handleSubmit}
-                >
+                <Button onPress={handleSubmit}>
                   Continue
                 </Button>
               </VStack>
-            </Box>
+            </VStack>
           )}
         </Formik>
       </Box>
-    </Center>
+    </Box >
   );
 }
 

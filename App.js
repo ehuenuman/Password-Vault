@@ -10,6 +10,7 @@ import theme from './app/theme/base';
 import { vault } from './app/data/vault';
 import ModalSelectService from './app/screens/UserPasswordData/components/ModalSelectService';
 import getAllBrands from './api/brands';
+import CreateAccount from './app/screens/CreateAccount';
 
 export default function App() {
   const [appIsReady, setAppIsReady] = useState(false);
@@ -52,7 +53,7 @@ export default function App() {
       <Box onLayout={onLayoutRootView} flex={1}>
         <NavigationContainer>
           <Stack.Navigator
-            initialRouteName="Home"
+            initialRouteName="CreateAccount"
             screenOptions={{
               headerTitle: (props) => <Center {...props}><Image source={require("./app/assets/favicon.png")} alt="Password Vault" size="25px" /></Center>,
               headerTitleAlign: "center",
@@ -60,6 +61,9 @@ export default function App() {
               cardStyle: { backgroundColor: 'white' }
             }}
           >
+            <Stack.Group>
+              <Stack.Screen name="CreateAccount" component={CreateAccount} />
+            </Stack.Group>
             <Stack.Group screenOptions={{ cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS }}>
               <Stack.Screen name="Home" component={PasswordsList} initialParams={{ decryptedData: decryptedData }} />
               <Stack.Screen name="UserPasswordData" component={UserPasswordData} initialParams={{ passwordId: "", action: "new" }} />
