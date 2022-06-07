@@ -5,7 +5,7 @@ import { FormControl, HStack, Input } from 'native-base';
 
 function InputField({
   label,
-  isViewMode,
+  isViewMode = false,
   hasChanged,
   ...props
 }) {
@@ -45,7 +45,7 @@ function InputField({
 
 InputField.propTypes = {
   label: PropTypes.string.isRequired,
-  isViewMode: PropTypes.bool.isRequired,
+  isViewMode: PropTypes.bool,
   hasChanged: PropTypes.func.isRequired
 }
 

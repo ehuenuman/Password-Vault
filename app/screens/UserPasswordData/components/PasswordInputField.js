@@ -10,7 +10,7 @@ import { getPasswordEntropy, getSecurityStatusMessage } from '../../../utils/pas
 
 function PasswordInputField({
   label,
-  isViewMode,
+  isViewMode = false,
   hasChanged,
   hasPasswordChecker = false,
   ...props
@@ -22,7 +22,7 @@ function PasswordInputField({
   useEffect(() => {
     // console.log(field.name, " isInitial: ", meta.initialValue === field.value);
     // console.log("dirty:", dirty);
-    setValues({ ...values, passwordStrength: getPasswordEntropy(field.value) });
+    hasPasswordChecker && setValues({ ...values, passwordStrength: getPasswordEntropy(field.value) });
     hasChanged(dirty);
   }, [field.value]);
 
@@ -100,8 +100,8 @@ function PasswordInputField({
 
 PasswordInputField.propTypes = {
   label: PropTypes.string.isRequired,
-  isViewMode: PropTypes.bool.isRequired,
-  hasChanged: PropTypes.func.isRequired,
+  isViewMode: PropTypes.bool,
+  hasChanged: PropTypes.func,
   hasPasswordChecker: PropTypes.bool
 }
 
