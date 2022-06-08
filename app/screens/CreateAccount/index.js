@@ -4,11 +4,11 @@ import { object, string, ref } from "yup";
 import {
   Box,
   Button,
-  ScrollView,
   Text,
   VStack,
 } from 'native-base';
 
+import { createUser, isEmailAvailable } from "../../../api/user";
 import InputField from "../UserPasswordData/components/InputField";
 import PasswordInputField from "../UserPasswordData/components/PasswordInputField";
 
@@ -45,12 +45,23 @@ function CreateAccount({ route, navigation }) {
   ), [hasUnsavedChanges, navigation]);
 
   const submitForm = values => {
-    console.log(values);
+    createUser(values)
+      .then(userId => {
+        //Jump to HomeScreen
+      })
+      .catch(err => console.warn(err));
   }
 
   let formSchema = object({
     userName: string().required("Required field"),
-    email: string().email("Write a valid email").required("Required field"),
+    email: string()
+      .email("Write a valid email")
+      .required("Required field")
+      .test(
+        "EmailAvailability",
+        "Email is already used",
+        async value => await isEmailAvailable(value).then(isAvailable => isAvailable)
+      ),
     masterPassword: string().required("Required field"),
     masterPassword2: string().required("Required field").oneOf([ref('masterPassword'), null], "Passwords must match")
   });
@@ -69,7 +80,7 @@ function CreateAccount({ route, navigation }) {
           validationSchema={formSchema}
           onSubmit={values => submitForm(values)}
         >
-          {({ handleSubmit, handleBlur, handleChange, values, setFieldError }) => (
+          {({ handleSubmit, handleBlur, handleChange, values }) => (
             <VStack maxWidth="300px" space="24">
               <VStack>
                 <InputField
@@ -83,6 +94,7 @@ function CreateAccount({ route, navigation }) {
                 <InputField
                   name="email"
                   label="Email"
+                  type="email"
                   onChangeText={handleChange("email")}
                   onBlur={handleBlur("email")}
                   value={values.email}
