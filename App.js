@@ -9,9 +9,10 @@ import { vault } from './app/data/vault';
 import theme from './app/theme/base';
 import PasswordsList from './app/screens/PasswordsList';
 import UserPasswordData from './app/screens/UserPasswordData';
+import ModalSelectService from './app/screens/UserPasswordData/components/ModalSelectService';
 import CreateAccount from './app/screens/CreateAccount';
 import Welcome from './app/screens/IntroSlider';
-import ModalSelectService from './app/screens/UserPasswordData/components/ModalSelectService';
+import Login from './app/screens/Login';
 
 export default function App() {
   const [appIsReady, setAppIsReady] = useState(false);
@@ -65,7 +66,7 @@ export default function App() {
             <Stack.Group>
               <Stack.Screen name="Welcome" component={Welcome} options={{ headerShown: false }} />
               <Stack.Screen name="CreateAccount" component={CreateAccount} options={{ title: "", headerShadowVisible: false }} />
-              {/* <Stack.Screen name="FirstLogin" component={FirstLogin} /> */}
+              <Stack.Screen name="FirstLogin" component={Login} options={{ title: "", headerShadowVisible: false }} />
             </Stack.Group>
             <Stack.Group
               screenOptions={{

@@ -1,5 +1,5 @@
-import { Box, Button, HStack, Image, Text, VStack } from 'native-base';
 import React from 'react';
+import { Box, Button, Image, Text, VStack } from 'native-base';
 
 function Welcome({ router, navigation }) {
   return (
@@ -20,7 +20,13 @@ function Welcome({ router, navigation }) {
         </VStack>
         <Box>
           <Button.Group isAttached size="lg">
-            <Button width="100px" _text={{ textTransform: "uppercase" }}>Log in</Button>
+            <Button
+              width="100px"
+              _text={{ textTransform: "uppercase" }}
+              onPress={() => navigation.navigate("FirstLogin")}
+            >
+              Log in
+            </Button>
             <Button
               colorScheme="secondary"
               width="100"
