@@ -2,12 +2,20 @@ import React from 'react';
 import { Formik } from 'formik';
 import { object, string } from 'yup';
 import { Box, Button, FormControl, HStack, Image, Input, VStack } from 'native-base';
+import { loginByFirstTime } from '../../../api/user';
 
 function Login({ route, navigation }) {
   // const { isPersistentUSer } = route.params;
 
   const submitForm = values => {
     console.log(values);
+    loginByFirstTime(values)
+      .then(response => {
+        response.isValid
+          ? console.log(response.message)
+          : console.log(response.message)
+      })
+      .catch(err => console.warn(err));
   }
 
   let formSchema = object({
@@ -33,7 +41,6 @@ function Login({ route, navigation }) {
         {({ handleSubmit, handleBlur, handleChange, values, touched, errors }) => (
           <Box
             flex="1"
-            flexDirection="column"
             justifyContent="space-between"
             maxWidth="300px"
           >
