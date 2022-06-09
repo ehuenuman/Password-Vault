@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Alert } from "react-native";
 import { Formik } from "formik";
 import { object, string, ref } from "yup";
 import {
@@ -19,28 +20,24 @@ function CreateAccount({ route, navigation }) {
   useEffect(() => navigation.addListener(
     'beforeRemove', e => {
       const action = e.data.action;
-      if (formMode === "view") {
-        return
-      } else {
-        if (!hasUnsavedChanges) {
-          // If we don't have unsaved changes, then we don't need to do anything
-          return;
-        }
-        e.preventDefault();
-
-        Alert.alert(
-          'Discard changes?',
-          'You have unsaved changes. Are you sure to discard them and go back?',
-          [
-            { text: "Don't leave", style: 'cancel', onPress: () => { } },
-            {
-              text: 'Discard',
-              style: 'destructive',
-              onPress: () => navigation.dispatch(action),
-            },
-          ]
-        );
+      if (!hasUnsavedChanges) {
+        // If we don't have unsaved changes, then we don't need to do anything
+        return;
       }
+      e.preventDefault();
+
+      Alert.alert(
+        "You are on your way to enjoying the best app",
+        "Are you sure to go back?",
+        [
+          { text: "No", style: 'cancel', onPress: () => { } },
+          {
+            text: 'Yes',
+            style: 'destructive',
+            onPress: () => navigation.dispatch(action),
+          },
+        ]
+      );
     }
   ), [hasUnsavedChanges, navigation]);
 
