@@ -4,13 +4,14 @@ import { NavigationContainer } from '@react-navigation/native';
 import { CardStyleInterpolators, createStackNavigator } from '@react-navigation/stack';
 import { NativeBaseProvider, Box, Image, Center, Icon } from 'native-base';
 
+import getAllBrands from './api/brands';
+import { vault } from './app/data/vault';
+import theme from './app/theme/base';
 import PasswordsList from './app/screens/PasswordsList';
 import UserPasswordData from './app/screens/UserPasswordData';
-import theme from './app/theme/base';
-import { vault } from './app/data/vault';
-import ModalSelectService from './app/screens/UserPasswordData/components/ModalSelectService';
-import getAllBrands from './api/brands';
 import CreateAccount from './app/screens/CreateAccount';
+import Welcome from './app/screens/IntroSlider';
+import ModalSelectService from './app/screens/UserPasswordData/components/ModalSelectService';
 
 export default function App() {
   const [appIsReady, setAppIsReady] = useState(false);
@@ -53,18 +54,23 @@ export default function App() {
       <Box onLayout={onLayoutRootView} flex={1}>
         <NavigationContainer>
           <Stack.Navigator
-            initialRouteName="CreateAccount"
+            initialRouteName="Welcome"
             screenOptions={{
-              headerTitle: (props) => <Center {...props}><Image source={require("./app/assets/favicon.png")} alt="Password Vault" size="25px" /></Center>,
               headerTitleAlign: "center",
               headerTintColor: theme.colors.primary[600],
-              cardStyle: { backgroundColor: 'white' }
+              cardStyle: { backgroundColor: 'white' },
+              cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS
             }}
           >
             <Stack.Group>
-              <Stack.Screen name="CreateAccount" component={CreateAccount} />
+              <Stack.Screen name="Welcome" component={Welcome} options={{ headerShown: false }} />
+              <Stack.Screen name="CreateAccount" component={CreateAccount} options={{ title: "", headerShadowVisible: false }} />
+              {/* <Stack.Screen name="FirstLogin" component={FirstLogin} /> */}
             </Stack.Group>
-            <Stack.Group screenOptions={{ cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS }}>
+            <Stack.Group
+              screenOptions={{
+                headerTitle: (props) => <Center {...props}><Image source={require("./app/assets/favicon.png")} alt="Password Vault" size="25px" /></Center>
+              }}>
               <Stack.Screen name="Home" component={PasswordsList} initialParams={{ decryptedData: decryptedData }} />
               <Stack.Screen name="UserPasswordData" component={UserPasswordData} initialParams={{ passwordId: "", action: "new" }} />
             </Stack.Group>
