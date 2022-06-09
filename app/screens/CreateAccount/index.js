@@ -123,7 +123,7 @@ function CreateAccount({ route, navigation }) {
               </VStack>
               <VStack space="2">
                 <Text textAlign="center">
-                  Clicking on continue button you are accepting our terms and conditions.
+                  By clicking continue, you are accepting our terms and conditions of use.
                 </Text>
                 <Button onPress={handleSubmit}>
                   Continue
