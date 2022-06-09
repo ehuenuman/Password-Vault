@@ -62,7 +62,13 @@ function CreateAccount({ route, navigation }) {
         "Email is already used",
         async value => await isEmailAvailable(value).then(isAvailable => isAvailable)
       ),
-    masterPassword: string().required("Required field"),
+    masterPassword: string()
+      .matches(/[0-9]+/, "Must have at least one digit.")
+      .matches(/[a-z]+/, "Must have at least one lower case.")
+      .matches(/[A-Z]+/, "Must have at least one upper case.")
+      .matches(/[!"#$%&'()*+,\-.\/:;<=>?@\[\]\\^_`{|}~]+/, "Must have at least one symbol.")
+      .min(15, "Use 15 or more characters")
+      .required("Required field"),
     masterPassword2: string().required("Required field").oneOf([ref('masterPassword'), null], "Passwords must match")
   });
 
