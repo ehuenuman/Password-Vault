@@ -21,7 +21,7 @@ export const getPasswordEntropy = password => {
     numbers: /\d+/,
     upperCaseLetters: /[A-Z]/,
     lowerCaseLetters: /[a-z]/,
-    specialSymbols: /[!"#$%&'()*+,-.\/:;<=>?@\[\]\\^_`{|}~]/
+    specialSymbols: /[!"#$%&'()*+,\-.\/:;<=>?@\[\]\\^_`{|}~]/
   }
 
   if (lengthPassword > 0) {
