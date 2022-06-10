@@ -4,6 +4,7 @@ import { Formik } from "formik";
 import { object, string, ref } from "yup";
 import {
   Button,
+  Image,
   ScrollView,
   Text,
   VStack,
@@ -90,11 +91,13 @@ function CreateAccount({ route, navigation }) {
             justifyContent: "space-around",
             alignSelf: "center",
             paddingHorizontal: "15%",
+            paddingBottom: "5%",
             width: "100%",
             minWidth: 300,
           }}
         >
           <VStack space="5">
+            <Image source={require("../../assets/logo_bg_transparent.png")} alt="Security Pass - All in one place" size="xl" resizeMode="contain" alignSelf="center" />
             <InputField
               name="userName"
               label="Name"

@@ -53,6 +53,7 @@ function Login({ route, navigation }) {
             justifyContent: "space-around",
             alignSelf: "center",
             paddingHorizontal: "15%",
+            paddingBottom: "5%",
             width: "100%",
             minWidth: 300,
           }}
