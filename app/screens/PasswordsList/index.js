@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { Avatar, Box, FlatList, HStack, Icon, IconButton, Text, VStack } from 'native-base';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -6,11 +6,16 @@ import SearchBar from './components/SearchBar';
 import Footer from './components/Footer';
 import { vault } from '../../data/vault';
 import { useFocusEffect, useIsFocused } from '@react-navigation/native';
+import { AuthContext } from '../../data/AuthContext';
 
 function PasswordsList({ route, navigation }) {
 
   const { decryptedData } = route.params;
   const isFocused = useIsFocused();
+
+  const { signOut } = useContext(AuthContext);
+
+  signOut();
 
   return (
     <Box flex="1" bg="white">

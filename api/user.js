@@ -9,7 +9,7 @@ const db = getFirestore(app);
  * Verify whether the email is available to be used by the new user.
  * 
  * @param {string} email 
- * @returns Availabilty of the email.
+ * @returns Availability of the email.
  */
 export async function isEmailAvailable(email) {
   const q = query(collection(db, "users"), where("email", "==", email));
@@ -20,12 +20,12 @@ export async function isEmailAvailable(email) {
 
 /**
  * Check the user credentials.
- * `loginByFirstTime()` is used when the user has not done loggin in before.
+ * `logInUser()` is used when the user has not done loggin in before.
  * 
- * @param {object} loginData `Object` that contain the user/email and the password typed by the user
- * @returns `Object` with the validity status and a message. If `isValid` is `true` then `message` is the user's ID.
+ * @param {object} loginData `Object` that contain the user/email and the password typed by the user.
+ * @returns `Object` with the validity status and a message. If `isValid` is `true` then `message` is the user's ID that will be used as `userToke`.
  */
-export async function loginByFirstTime(loginData) {
+export async function logInUser(loginData) {
   var response = {
     isValid: false,
     message: ""
@@ -43,7 +43,7 @@ export async function loginByFirstTime(loginData) {
         else
           response["message"] = "Wrong password"
       })
-      .catch(err => console.warn(err));
+      .catch(e => console.error(e));
   }
   return response
 }
@@ -51,23 +51,23 @@ export async function loginByFirstTime(loginData) {
 /**
  * Create a new user into the database.
  * 
- * @param {object} formData An `Object` withh the data of the new user.
- * @returns User ID
+ * @param {object} registerData An `Object` with the data of the new user.
+ * @returns User ID to be used as userToken.
  */
-export async function createUser(formData) {
+export async function signUpUser(registerData) {
   var newUser = {
-    name: formData.userName,
-    email: formData.email,
+    name: registerData.userName,
+    email: registerData.email,
     dateJoined: Timestamp.now()
   }
   //TO DO: Use a better hashing method like bcrypt.
-  await sha512(formData.masterPassword)
+  await sha512(registerData.masterPassword)
     .then(hash => newUser = { ...newUser, hash: hash })
-    .catch(err => console.warn(err));
+    .catch(e => console.error(e));
 
   const docRef = await addDoc(collection(db, "users"), newUser);
 
-  return (docRef.id);
+  return docRef.id
 }
 
 /**

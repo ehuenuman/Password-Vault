@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Alert } from "react-native";
 import { Formik } from "formik";
 import { object, string, ref } from "yup";
@@ -10,7 +10,8 @@ import {
   VStack,
 } from 'native-base';
 
-import { createUser, isEmailAvailable } from "../../../api/user";
+import { isEmailAvailable } from "../../../api/user";
+import { AuthContext } from "../../data/AuthContext";
 import InputField from "../UserPasswordData/components/InputField";
 import PasswordInputField from "../UserPasswordData/components/PasswordInputField";
 
@@ -19,6 +20,8 @@ function CreateAccount({ route, navigation }) {
   const { email } = route.params;
 
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  const { signUp } = useContext(AuthContext);
 
   useEffect(() => navigation.addListener(
     'beforeRemove', e => {
@@ -42,14 +45,6 @@ function CreateAccount({ route, navigation }) {
       );
     }
   ), [hasUnsavedChanges, navigation]);
-
-  const submitForm = values => {
-    createUser(values)
-      .then(userId => {
-        //Jump to HomeScreen
-      })
-      .catch(err => console.warn(err));
-  }
 
   let formSchema = object({
     userName: string().required("Required field"),
@@ -81,9 +76,9 @@ function CreateAccount({ route, navigation }) {
         masterPassword2: ""
       }}
       validationSchema={formSchema}
-      onSubmit={values => submitForm(values)}
+      onSubmit={values => signUp(values)}
     >
-      {({ handleSubmit, handleBlur, handleChange, values, touched, errors }) => (
+      {({ handleSubmit, handleBlur, handleChange, values, touched, errors, isSubmitting }) => (
         <ScrollView
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{
@@ -109,7 +104,6 @@ function CreateAccount({ route, navigation }) {
             <InputField
               name="email"
               label="Email"
-              type="email"
               onChangeText={handleChange("email")}
               onBlur={handleBlur("email")}
               value={values.email}
@@ -148,7 +142,7 @@ function CreateAccount({ route, navigation }) {
             <Text textAlign="center">
               By clicking continue, you are accepting our terms and conditions of use.
             </Text>
-            <Button onPress={handleSubmit}>
+            <Button onPress={handleSubmit} isLoading={isSubmitting} isLoadingText="Creating account">
               Continue
             </Button>
           </VStack>

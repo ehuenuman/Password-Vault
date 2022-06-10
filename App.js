@@ -6,7 +6,7 @@ import { CardStyleInterpolators, createStackNavigator } from '@react-navigation/
 import { NativeBaseProvider, Box, Image, Center } from 'native-base';
 
 import getAllBrands from './api/brands';
-import { logInUser } from './api/user';
+import { logInUser, signUpUser } from './api/user';
 import { vault } from './app/data/vault';
 import { AuthContext } from './app/data/AuthContext';
 import theme from './app/theme/base';
@@ -59,7 +59,6 @@ export default function App() {
       try {
         await SplashScreen.preventAutoHideAsync();
         userToken = await SecureStore.getItemAsync("userToken");
-        console.log(userToken);
 
         await vault.init(setDecryptedData).then(response => {
           response && setAppIsReady(true);
@@ -77,13 +76,8 @@ export default function App() {
   const authContext = useMemo(
     () => ({
       signIn: async (data) => {
-        // In a production app, we need to send some data (usually username, password) to server and get a token
-        // We will also need to handle errors if sign in failed
-        // After getting token, we need to persist the token using `SecureStore`
-        // In the example, we'll use a dummy token
-
         let response = "OK";
-        const loginObject = await logInUser(data).catch(err => console.warn(err));
+        const loginObject = await logInUser(data).catch(e => console.warn(e));
 
         if (loginObject.isValid) {
           // console.log(loginObject.message);
@@ -95,13 +89,13 @@ export default function App() {
 
         return response
       },
-      signOut: () => dispatch({ type: "SIGN_OUT" }),
+      signOut: async () => {
+        await SecureStore.deleteItemAsync("userToken");
+        dispatch({ type: "SIGN_OUT" });
+      },
       signUp: async (data) => {
-        // In a production app, we need to send user data to server and get a token
-        // We will also need to handle errors if sign up failed
-        // After getting token, we need to persist the token using `SecureStore`
-        // In the example, we'll use a dummy token
-
+        const loginObject = await signUpUser(data).catch(e => console.error(e));
+        await SecureStore.setItemAsync("userToken", loginObject);
         dispatch({ type: "SIGN_IN", token: "USER_ID" });
       },
     }),

@@ -39,7 +39,7 @@ function PasswordInputField({
   };
 
   return (
-    <FormControl isDisabled={isViewMode} isInvalid={meta.touched && meta.error && true}>
+    <FormControl isDisabled={isViewMode} isInvalid={meta.touched && meta.error}>
       <HStack space="1">
         <FormControl.Label
           flex="1"

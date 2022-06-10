@@ -4,12 +4,13 @@ import { useField, useFormikContext } from 'formik';
 import { FormControl, HStack, Input } from 'native-base';
 
 function InputField({
+  name,
   label,
   isViewMode = false,
   hasChanged,
   ...props
 }) {
-  const [field, meta] = useField(props);
+  const [field, meta] = useField(name);
   const { dirty } = useFormikContext();
 
   useEffect(() => {
@@ -44,6 +45,7 @@ function InputField({
 }
 
 InputField.propTypes = {
+  name: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   isViewMode: PropTypes.bool,
   hasChanged: PropTypes.func.isRequired
