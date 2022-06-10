@@ -65,8 +65,8 @@ export default function App() {
           >
             <Stack.Group>
               <Stack.Screen name="Welcome" component={Welcome} options={{ headerShown: false }} />
-              <Stack.Screen name="CreateAccount" component={CreateAccount} options={{ title: "", headerShadowVisible: false }} />
-              <Stack.Screen name="FirstLogin" component={Login} initialParams={{ isPersistantUser: false }} options={{ title: "", headerShadowVisible: false }} />
+              <Stack.Screen name="CreateAccount" component={CreateAccount} initialParams={{ email: "" }} options={{ title: "", headerShadowVisible: false }} />
+              <Stack.Screen name="FirstLogin" component={Login} initialParams={{ isPersistantUser: false, email: "" }} options={{ title: "", headerShadowVisible: false }} />
             </Stack.Group>
             <Stack.Group
               screenOptions={{

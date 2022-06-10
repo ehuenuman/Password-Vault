@@ -15,6 +15,8 @@ import PasswordInputField from "../UserPasswordData/components/PasswordInputFiel
 
 function CreateAccount({ route, navigation }) {
 
+  const { email } = route.params;
+
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   useEffect(() => navigation.addListener(
@@ -72,7 +74,7 @@ function CreateAccount({ route, navigation }) {
     <Formik
       initialValues={{
         userName: "",
-        email: "",
+        email: email,
         masterPassword: "",
         passwordStrength: 0,
         masterPassword2: ""

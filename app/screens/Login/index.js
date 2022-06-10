@@ -7,7 +7,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { isEmailAvailable, loginByFirstTime } from '../../../api/user';
 
 function Login({ route, navigation }) {
-  const { isPersistentUser, email = "" } = route.params;
+  const { isPersistentUser, email } = route.params;
 
   const [coulBeNewUser, setCouldBeNewUser] = useState(false);
   const [isFailLogin, setIsFailLogin] = useState(false);
@@ -79,17 +79,19 @@ function Login({ route, navigation }) {
                     }}
                     onFocus={e => setCouldBeNewUser(false)}
                     value={values.email}
+                    rightElement={
+                      coulBeNewUser
+                      &&
+                      <Button
+                        variant="ghost"
+                        mx={1}
+                        onPress={() => navigation.navigate("CreateAccount", { email: values.email })}
+                      >
+                        Sign up
+                      </Button>
+                    }
                   />
                 </FormControl>
-                {coulBeNewUser &&
-                  <Button
-                    size="xs"
-                    colorScheme="secondary"
-                    onPress={() => navigation.navigate("CreateAccount")}
-                  >
-                    Create an account
-                  </Button>
-                }
                 <FormControl isInvalid={isFailLogin || (touched.masterPassword && errors.masterPassword)}>
                   <HStack space="1">
                     <FormControl.Label flexGrow="1" _text={{ textTransform: "uppercase" }}>Master Password</FormControl.Label>
