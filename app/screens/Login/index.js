@@ -1,21 +1,33 @@
-import React from 'react';
+import React, { createRef, useState } from 'react';
 import { Formik } from 'formik';
 import { object, string } from 'yup';
-import { Box, Button, FormControl, HStack, Image, Input, VStack } from 'native-base';
-import { loginByFirstTime } from '../../../api/user';
+import { Alert, Box, Button, FormControl, HStack, Icon, IconButton, Image, Input, KeyboardAvoidingView, ScrollView, Text, VStack } from 'native-base';
+import { FontAwesome } from '@expo/vector-icons';
+
+import { isEmailAvailable, loginByFirstTime } from '../../../api/user';
 
 function Login({ route, navigation }) {
   // const { isPersistentUSer } = route.params;
+  const [coulBeNewUser, setCouldBeNewUser] = useState(false);
+  const [isFailLogin, setIsFailLogin] = useState(false);
+  const [loginMessage, setLoginMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
-  const submitForm = values => {
-    console.log(values);
+  const submitForm = (values, formikBag) => {
+    setCouldBeNewUser(false);
+    setIsFailLogin(false);
+
     loginByFirstTime(values)
-      .then(response => {
-        response.isValid
-          ? console.log(response.message)
-          : console.log(response.message)
+      .then(loginObject => {
+        if (loginObject.isValid) {
+          console.log(loginObject.message)
+        } else {
+          setLoginMessage(loginObject.message);
+          setIsFailLogin(true);
+        }
       })
-      .catch(err => console.warn(err));
+      .catch(err => console.warn(err))
+      .finally(() => formikBag.setSubmitting(false));
   }
 
   let formSchema = object({
@@ -24,65 +36,95 @@ function Login({ route, navigation }) {
   });
 
   return (
-    <Box
-      flex="1"
-      pb="32"
-      pt="20"
-      px="15%"
+    <Formik
+      initialValues={{
+        email: "",
+        masterPassword: ""
+      }}
+      validationSchema={formSchema}
+      onSubmit={(values, formikBag) => submitForm(values, formikBag)}
     >
-      <Formik
-        initialValues={{
-          email: "",
-          masterPassword: ""
-        }}
-        validationSchema={formSchema}
-        onSubmit={values => submitForm(values)}
-      >
-        {({ handleSubmit, handleBlur, handleChange, values, touched, errors }) => (
-          <Box
-            flex="1"
-            justifyContent="space-between"
-            maxWidth="300px"
-          >
-            <VStack space="10">
-              <Image source={require("../../assets/icon_bg_transparent.png")} alt="Security Pass - All in one place" size="lg" resizeMode="contain" alignSelf="center" />
-              <VStack>
-                <VStack space="5">
-                  <FormControl isInvalid={touched.email && errors.email} >
-                    <HStack space="1">
-                      <FormControl.Label flex="1" _text={{ textTransform: "uppercase" }}>Email</FormControl.Label>
-                      <FormControl.ErrorMessage>{errors.email}</FormControl.ErrorMessage>
-                    </HStack>
-                    <Input
-                      type="email"
-                      onChangeText={handleChange("email")}
-                      onBlur={handleBlur("email")}
-                      value={values.email}
-                    />
-                  </FormControl>
-                  <FormControl isInvalid={touched.masterPassword && errors.masterPassword} >
-                    <HStack space="1">
-                      <FormControl.Label flex={1} _text={{ textTransform: "uppercase" }}>Master Password</FormControl.Label>
-                      <FormControl.ErrorMessage>{errors.masterPassword}</FormControl.ErrorMessage>
-                    </HStack>
-                    <Input
-                      type="password"
-                      onChangeText={handleChange("masterPassword")}
-                      onBlur={handleBlur("masterPassword")}
-                      value={values.masterPassword}
-                    />
-                  </FormControl>
-                </VStack>
+      {({ handleSubmit, handleBlur, handleChange, values, touched, errors, isSubmitting, setFieldTouched, setFieldError }) => (
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: "space-around",
+            alignSelf: "center",
+            paddingHorizontal: "15%",
+            width: "100%",
+            minWidth: 300,
+          }}
+        >
+          <VStack space="10">
+            <Image source={require("../../assets/icon_bg_transparent.png")} alt="Security Pass - All in one place" size="lg" resizeMode="contain" alignSelf="center" />
+            <VStack>
+              <VStack space="5">
+                <FormControl isInvalid={isFailLogin || (touched.email && errors.email)}>
+                  <HStack space="1">
+                    <FormControl.Label flexGrow="1" _text={{ textTransform: "uppercase" }}>Email</FormControl.Label>
+                    <FormControl.ErrorMessage>{errors.email}</FormControl.ErrorMessage>
+                  </HStack>
+                  <Input
+                    onChangeText={handleChange("email")}
+                    onBlur={e => {
+                      setFieldTouched("email", true);
+                      values.email.length > 0
+                        && isEmailAvailable(values.email)
+                          .then(response => {
+                            response && setFieldError("email", "Email does not have registered account");
+                            response && setCouldBeNewUser(true);
+                          });
+                    }}
+                    onFocus={e => setCouldBeNewUser(false)}
+                    value={values.email}
+                  />
+                </FormControl>
+                {coulBeNewUser &&
+                  <Button
+                    size="xs"
+                    colorScheme="secondary"
+                    onPress={() => navigation.navigate("CreateAccount")}
+                  >
+                    Create an account
+                  </Button>
+                }
+                <FormControl isInvalid={isFailLogin || (touched.masterPassword && errors.masterPassword)}>
+                  <HStack space="1">
+                    <FormControl.Label flexGrow="1" _text={{ textTransform: "uppercase" }}>Master Password</FormControl.Label>
+                    <FormControl.ErrorMessage>{errors.masterPassword}</FormControl.ErrorMessage>
+                  </HStack>
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    onChangeText={handleChange("masterPassword")}
+                    onBlur={handleBlur("masterPassword")}
+                    value={values.masterPassword}
+                    rightElement={
+                      <IconButton
+                        icon={<Icon as={FontAwesome} name={showPassword ? "eye" : "eye-slash"} />}
+                        borderRadius="full"
+                        onPress={() => {
+                          setShowPassword(!showPassword)
+                        }}
+                      />
+                    }
+                  />
+                </FormControl>
+                {
+                  isFailLogin &&
+                  <Alert status="error" width="100%">
+                    <Text>{loginMessage}</Text>
+                  </Alert>
+                }
               </VStack>
             </VStack>
-            <Button onPress={handleSubmit}>
-              Continue
-            </Button>
-          </Box>
-        )
-        }
-      </Formik >
-    </Box >
+          </VStack>
+          <Button onPress={handleSubmit} isLoading={isSubmitting} isLoadingText="LOGING IN" mt="4">
+            Continue
+          </Button>
+        </ScrollView>
+      )}
+    </Formik >
   )
 }
 
