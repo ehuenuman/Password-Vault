@@ -1,33 +1,34 @@
-import React, { createRef, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Formik } from 'formik';
 import { object, string } from 'yup';
-import { Alert, Box, Button, FormControl, HStack, Icon, IconButton, Image, Input, ScrollView, Text, VStack } from 'native-base';
+import { Alert, Button, FormControl, HStack, Icon, IconButton, Image, Input, ScrollView, Text, VStack } from 'native-base';
 import { FontAwesome } from '@expo/vector-icons';
 
-import { isEmailAvailable, loginByFirstTime } from '../../../api/user';
+import { isEmailAvailable } from '../../../api/user';
+import { AuthContext } from '../../data/AuthContext';
 
 function Login({ route, navigation }) {
-  const { isPersistentUser, email } = route.params;
+  const { email } = route.params;
 
   const [coulBeNewUser, setCouldBeNewUser] = useState(false);
   const [isFailLogin, setIsFailLogin] = useState(false);
   const [loginMessage, setLoginMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
+  const { signIn } = useContext(AuthContext);
+
   const submitForm = (values, formikBag) => {
     setCouldBeNewUser(false);
     setIsFailLogin(false);
 
-    loginByFirstTime(values)
-      .then(loginObject => {
-        if (loginObject.isValid) {
-          console.log(loginObject.message)
-        } else {
-          setLoginMessage(loginObject.message);
+    signIn(values)
+      .then(response => {
+        if (response !== "OK") {
+          setLoginMessage(response);
           setIsFailLogin(true);
         }
       })
-      .catch(err => console.warn(err))
+      .catch(e => console.error(e))
       .finally(() => formikBag.setSubmitting(false));
   }
 
