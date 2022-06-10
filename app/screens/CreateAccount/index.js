@@ -3,8 +3,8 @@ import { Alert } from "react-native";
 import { Formik } from "formik";
 import { object, string, ref } from "yup";
 import {
-  Box,
   Button,
+  ScrollView,
   Text,
   VStack,
 } from 'native-base';
@@ -21,7 +21,6 @@ function CreateAccount({ route, navigation }) {
     'beforeRemove', e => {
       const action = e.data.action;
       if (!hasUnsavedChanges) {
-        // If we don't have unsaved changes, then we don't need to do anything
         return;
       }
       e.preventDefault();
@@ -70,70 +69,87 @@ function CreateAccount({ route, navigation }) {
   });
 
   return (
-    <Box flex="1" justifyContent="center" alignItems="center">
-      <Box px="15%">
-        <Formik
-          initialValues={{
-            userName: "",
-            email: "",
-            masterPassword: "",
-            passwordStrength: 0,
-            masterPassword2: ""
+    <Formik
+      initialValues={{
+        userName: "",
+        email: "",
+        masterPassword: "",
+        passwordStrength: 0,
+        masterPassword2: ""
+      }}
+      validationSchema={formSchema}
+      onSubmit={values => submitForm(values)}
+    >
+      {({ handleSubmit, handleBlur, handleChange, values, touched, errors }) => (
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: "space-around",
+            alignSelf: "center",
+            paddingHorizontal: "15%",
+            width: "100%",
+            minWidth: 300,
           }}
-          validationSchema={formSchema}
-          onSubmit={values => submitForm(values)}
         >
-          {({ handleSubmit, handleBlur, handleChange, values }) => (
-            <VStack maxWidth="300px" space="24">
-              <VStack>
-                <InputField
-                  name="userName"
-                  label="Name"
-                  onChangeText={handleChange("userName")}
-                  onBlur={handleBlur("userName")}
-                  value={values.userName}
-                  hasChanged={setHasUnsavedChanges}
-                />
-                <InputField
-                  name="email"
-                  label="Email"
-                  type="email"
-                  onChangeText={handleChange("email")}
-                  onBlur={handleBlur("email")}
-                  value={values.email}
-                  hasChanged={setHasUnsavedChanges}
-                />
-                <PasswordInputField
-                  name="masterPassword"
-                  label="Master Password"
-                  onChangeText={handleChange("masterPassword")}
-                  onBlur={handleBlur("masterPassword")}
-                  value={values.masterPassword}
-                  hasPasswordChecker={true}
-                  hasChanged={setHasUnsavedChanges}
-                />
-                <PasswordInputField
-                  name="masterPassword2"
-                  label="Confirm Master Password"
-                  onChangeText={handleChange("masterPassword2")}
-                  onBlur={handleBlur("masterPassword2")}
-                  value={values.masterPassword2}
-                  hasChanged={setHasUnsavedChanges}
-                />
-              </VStack>
-              <VStack space="2">
-                <Text textAlign="center">
-                  By clicking continue, you are accepting our terms and conditions of use.
-                </Text>
-                <Button onPress={handleSubmit}>
-                  Continue
+          <VStack space="5">
+            <InputField
+              name="userName"
+              label="Name"
+              onChangeText={handleChange("userName")}
+              onBlur={handleBlur("userName")}
+              value={values.userName}
+              hasChanged={setHasUnsavedChanges}
+            />
+            <InputField
+              name="email"
+              label="Email"
+              type="email"
+              onChangeText={handleChange("email")}
+              onBlur={handleBlur("email")}
+              value={values.email}
+              hasChanged={setHasUnsavedChanges}
+              rightElement={
+                touched.email && errors.email === "Email is already used"
+                &&
+                <Button
+                  variant="ghost"
+                  mx={1}
+                  onPress={() => navigation.navigate("FirstLogin", { email: values.email })}
+                >
+                  Log in
                 </Button>
-              </VStack>
-            </VStack>
-          )}
-        </Formik>
-      </Box>
-    </Box >
+              }
+            />
+            <PasswordInputField
+              name="masterPassword"
+              label="Master Password"
+              onChangeText={handleChange("masterPassword")}
+              onBlur={handleBlur("masterPassword")}
+              value={values.masterPassword}
+              hasPasswordChecker={true}
+              hasChanged={setHasUnsavedChanges}
+            />
+            <PasswordInputField
+              name="masterPassword2"
+              label="Confirm Master Password"
+              onChangeText={handleChange("masterPassword2")}
+              onBlur={handleBlur("masterPassword2")}
+              value={values.masterPassword2}
+              hasChanged={setHasUnsavedChanges}
+            />
+          </VStack>
+          <VStack space="2">
+            <Text textAlign="center">
+              By clicking continue, you are accepting our terms and conditions of use.
+            </Text>
+            <Button onPress={handleSubmit}>
+              Continue
+            </Button>
+          </VStack>
+        </ScrollView>
+      )}
+    </Formik>
   );
 }
 
