@@ -1,13 +1,14 @@
 import React, { createRef, useState } from 'react';
 import { Formik } from 'formik';
 import { object, string } from 'yup';
-import { Alert, Box, Button, FormControl, HStack, Icon, IconButton, Image, Input, KeyboardAvoidingView, ScrollView, Text, VStack } from 'native-base';
+import { Alert, Box, Button, FormControl, HStack, Icon, IconButton, Image, Input, ScrollView, Text, VStack } from 'native-base';
 import { FontAwesome } from '@expo/vector-icons';
 
 import { isEmailAvailable, loginByFirstTime } from '../../../api/user';
 
 function Login({ route, navigation }) {
-  // const { isPersistentUSer } = route.params;
+  const { isPersistentUser, email = "" } = route.params;
+
   const [coulBeNewUser, setCouldBeNewUser] = useState(false);
   const [isFailLogin, setIsFailLogin] = useState(false);
   const [loginMessage, setLoginMessage] = useState("");
@@ -38,7 +39,7 @@ function Login({ route, navigation }) {
   return (
     <Formik
       initialValues={{
-        email: "",
+        email: email,
         masterPassword: ""
       }}
       validationSchema={formSchema}
