@@ -1,12 +1,12 @@
-import React, { createContext, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
 import * as SecureStore from 'expo-secure-store';
 import { NavigationContainer } from '@react-navigation/native';
 import { CardStyleInterpolators, createStackNavigator } from '@react-navigation/stack';
 import { NativeBaseProvider, Box, Image, Center } from 'native-base';
 
+import { signInUser, signOutUser, signUpUser } from './api/auth';
 import getAllBrands from './api/brands';
-import { logInUser, signUpUser } from './api/user';
 import { vault } from './app/data/vault';
 import { AuthContext } from './app/data/AuthContext';
 import theme from './app/theme/base';
@@ -59,12 +59,13 @@ export default function App() {
       try {
         await SplashScreen.preventAutoHideAsync();
         userToken = await SecureStore.getItemAsync("userToken");
+        // ?? await anonymousUser();
 
         await vault.init(setDecryptedData).then(response => {
           response && setAppIsReady(true);
         });
       } catch (error) {
-        console.warn(error);
+        console.error(error);
       }
 
       dispatch({ type: "RESTORE_TOKEN", token: userToken })
@@ -77,7 +78,7 @@ export default function App() {
     () => ({
       signIn: async (data) => {
         let response = "OK";
-        const loginObject = await logInUser(data).catch(e => console.warn(e));
+        const loginObject = await signInUser(data).catch(e => console.error(e));
 
         if (loginObject.isValid) {
           // console.log(loginObject.message);
@@ -90,13 +91,15 @@ export default function App() {
         return response
       },
       signOut: async () => {
+        // console.log("Sign out");
+        signOutUser();
         await SecureStore.deleteItemAsync("userToken");
         dispatch({ type: "SIGN_OUT" });
       },
       signUp: async (data) => {
-        const loginObject = await signUpUser(data).catch(e => console.error(e));
-        await SecureStore.setItemAsync("userToken", loginObject);
-        dispatch({ type: "SIGN_IN", token: "USER_ID" });
+        const userToken = await signUpUser(data).catch(e => console.error("100", e));
+        await SecureStore.setItemAsync("userToken", userToken);
+        dispatch({ type: "SIGN_IN", token: userToken });
       },
     }),
     []
