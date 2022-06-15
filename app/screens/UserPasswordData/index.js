@@ -19,7 +19,7 @@ import InputField from './components/InputField';
 import PasswordInputField from './components/PasswordInputField';
 import ModalCategories from './components/ModalCategories';
 import { vault } from '../../data/Vault';
-import { getAccountProviders } from '../../../api/brands';
+import { getAccountProviders } from '../../../api/accountProviders';
 
 function UserPasswordData({ route, navigation }) {
 
