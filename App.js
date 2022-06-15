@@ -5,9 +5,9 @@ import { NavigationContainer } from '@react-navigation/native';
 import { CardStyleInterpolators, createStackNavigator } from '@react-navigation/stack';
 import { NativeBaseProvider, Box, Image, Center } from 'native-base';
 
+import { auth } from './api/firebaseConfig';
 import { signInUser, signOutUser, signUpUser } from './api/auth';
-import getAllBrands from './api/brands';
-import { vault } from './app/data/vault';
+import { vault } from './app/data/Vault';
 import { AuthContext } from './app/data/AuthContext';
 import theme from './app/theme/base';
 import PasswordsList from './app/screens/PasswordsList';
@@ -20,8 +20,6 @@ import Login from './app/screens/Login';
 export default function App() {
 
   const [appIsReady, setAppIsReady] = useState(false);
-  const [decryptedData, setDecryptedData] = useState();
-  const [websites, setWebsites] = useState();
 
   const [state, dispatch] = useReducer(
     (prevState, action) => {
@@ -56,19 +54,21 @@ export default function App() {
   useEffect(() => {
     const prepare = async () => {
       let userToken;
+      let user = auth.currentUser;
       try {
         await SplashScreen.preventAutoHideAsync();
-        userToken = await SecureStore.getItemAsync("userToken");
-        // ?? await anonymousUser();
+        // userToken = await SecureStore.getItemAsync("userToken");
 
-        await vault.init(setDecryptedData).then(response => {
-          response && setAppIsReady(true);
-        });
+        if (user !== null) {
+          await vault.init().then(response => {
+            response && setAppIsReady(true);
+          });
+        }
+
       } catch (error) {
         console.error(error);
       }
-
-      dispatch({ type: "RESTORE_TOKEN", token: userToken })
+      setAppIsReady(true);
     }
 
     prepare();
@@ -82,8 +82,10 @@ export default function App() {
 
         if (loginObject.isValid) {
           // console.log(loginObject.message);
-          await SecureStore.setItemAsync("userToken", loginObject.message);
-          dispatch({ type: "SIGN_IN", token: loginObject.message });
+          // await SecureStore.setItemAsync("userToken", loginObject.message);
+          await vault.init();
+          setDecryptedData(vault.allDecryptedData());
+          // dispatch({ type: "SIGN_IN", token: loginObject.message });
         } else {
           response = loginObject.message;
         }
@@ -93,21 +95,17 @@ export default function App() {
       signOut: async () => {
         // console.log("Sign out");
         signOutUser();
-        await SecureStore.deleteItemAsync("userToken");
-        dispatch({ type: "SIGN_OUT" });
+        // await SecureStore.deleteItemAsync("userToken");
+        // dispatch({ type: "SIGN_OUT" });
       },
       signUp: async (data) => {
-        const userToken = await signUpUser(data).catch(e => console.error("100", e));
-        await SecureStore.setItemAsync("userToken", userToken);
-        dispatch({ type: "SIGN_IN", token: userToken });
+        const userToken = await signUpUser(data).catch(e => console.error(e));
+        // await SecureStore.setItemAsync("userToken", userToken);
+        // dispatch({ type: "SIGN_IN", token: userToken });
       },
     }),
     []
   );
-
-  useEffect(() => {
-    getAllBrands().then(data => setWebsites(data))
-  }, []);
 
   const onLayoutRootView = useCallback(async () => {
     if (appIsReady) {
@@ -136,7 +134,7 @@ export default function App() {
               }}
             >
               {
-                state.userToken == null ? (
+                auth.currentUser === null ? (
                   <Stack.Group>
                     <Stack.Screen name="Welcome" component={Welcome} options={{ headerShown: false }} />
                     <Stack.Screen name="CreateAccount" component={CreateAccount} initialParams={{ email: "" }} options={{ title: "", headerShadowVisible: false }} />
@@ -147,13 +145,13 @@ export default function App() {
                     screenOptions={{
                       headerTitle: (props) => <Center {...props}><Image source={require("./app/assets/favicon.png")} alt="Password Vault" size="25px" /></Center>
                     }}>
-                    <Stack.Screen name="Home" component={PasswordsList} initialParams={{ decryptedData: decryptedData }} />
-                    <Stack.Screen name="UserPasswordData" component={UserPasswordData} initialParams={{ passwordId: "", action: "new" }} />
+                    <Stack.Screen name="Home" component={PasswordsList} />
+                    <Stack.Screen name="UserPasswordData" component={UserPasswordData} />
                   </Stack.Group>
                 )
               }
               <Stack.Group screenOptions={{ presentation: "modal" }}>
-                <Stack.Screen name="ServicesModal" component={ModalSelectService} initialParams={{ services: websites }} options={{ headerTitle: "Select a Service" }} />
+                <Stack.Screen name="ServicesModal" component={ModalSelectService} options={{ headerTitle: "Select a Service" }} />
               </Stack.Group>
             </Stack.Navigator>
           </NavigationContainer>
