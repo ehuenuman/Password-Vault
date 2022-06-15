@@ -1,40 +1,36 @@
-import { getFirestore, Timestamp, collection, addDoc, setDoc, getDocs, getDoc, doc } from "firebase/firestore";
+import { collection, setDoc, getDocs, doc } from "firebase/firestore";
 
-import { app } from "./firebaseConfig";
+import { firestore } from "./firebaseConfig";
 
-const db = getFirestore(app);
-
-const USER_ID = "C9OB3RzOAt9tW4pOqC3r"
-
-export async function createUserPasswordData(data) {
-  // const values = {
-  //   ...data,
-  //   dataType: "password",
-  //   accountType: data.accountName,
-  //   createTimestamp: Timestamp.now(),
-  //   updateTimestamp: Timestamp.now()
-  // };
-
-  //console.log(values);
-
-  // const passwordCollectionRef = collection(db, "Users", USER_ID + "/passwords");
-  const ref = doc(db, "Users", USER_ID + "/passwords/" + data.id);
-  // const docRef = await addDod(passwordCollectionRef, values, );
+/**
+ * Write a new password register in the password user's colection.
+ * 
+ * @param {string} userId User ID.
+ * @param {object} data An `object` that contains the data to saved in Firestore.
+ */
+export async function writePasswordRegister(userId, data) {
+  const ref = doc(firestore, "users", userId + "/passwords/" + data.id);
   await setDoc(ref, data);
-  //console.log("Document written wirh ID: ", docRef.id);
 }
 
-export async function getAllEncryptedData() {
-  const colllectionRef = collection(db, "Users", USER_ID + "/passwords");
+/**
+ * 
+ * @param {string} userId User ID.
+ * @returns An `array` with password `objects`.
+ */
+export async function getAllEncryptedData(userId) {
+  const colllectionRef = collection(firestore, "users", userId + "/passwords");
   const querySnapshot = await getDocs(colllectionRef);
   var passwords = [];
 
-  querySnapshot.forEach(doc => {
-    //console.log(doc.id, " => ", doc.data());
-    passwords.push({
-      ...doc.data(),
-      "id": doc.id
+  if (querySnapshot.size > 0) {
+    querySnapshot.forEach(doc => {
+      passwords.push({
+        ...doc.data(),
+        "id": doc.id
+      });
     });
-  });
-  return passwords
+  }
+
+  return passwords;
 }
