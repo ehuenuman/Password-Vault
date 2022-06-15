@@ -84,7 +84,6 @@ export default function App() {
           // console.log(loginObject.message);
           // await SecureStore.setItemAsync("userToken", loginObject.message);
           await vault.init();
-          setDecryptedData(vault.allDecryptedData());
           // dispatch({ type: "SIGN_IN", token: loginObject.message });
         } else {
           response = loginObject.message;
