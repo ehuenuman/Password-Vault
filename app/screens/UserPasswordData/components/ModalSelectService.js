@@ -1,22 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { TouchableOpacity } from 'react-native';
-import { Avatar, Box, FlatList, HStack, Icon, Input, ScrollView, Text, VStack } from 'native-base';
+import React, { useState } from 'react';
+import { TouchableOpacity, LogBox } from 'react-native';
+import { Avatar, Box, FlatList, HStack, Icon, Input, Text, VStack } from 'native-base';
 import { FontAwesome } from '@expo/vector-icons';
 
 // TO DO: Fix this!
-import { LogBox } from 'react-native';
 LogBox.ignoreLogs([
   'Non-serializable values were found in the navigation state',
 ]);
 
 function ModalSelectService({ route, navigation }) {
-  const { services, values, setValues } = route.params;
+  const { accountProviders, values, setValues } = route.params;
   const [searchTerm, setSearchTerm] = useState();
-  const [suggestions, setSuggestions] = useState(services);
+  const [suggestions, setSuggestions] = useState(accountProviders);
 
   const updateSuggestions = query => {
     setSearchTerm(query);
-    var results = services.filter(i => i.name.toLowerCase().includes(query.toLowerCase()));
+    var results = accountProviders.filter(i => i.name.toLowerCase().includes(query.toLowerCase()));
     if (results.length > 0) {
       setSuggestions(results);
     } else {
