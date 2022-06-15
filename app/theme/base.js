@@ -47,6 +47,13 @@ export default theme = extendTheme({
           opacity: 1
         }
       }
+    },
+    Button: {
+      baseStyle: {
+        _text: {
+          textTransform: "uppercase"
+        }
+      }
     }
   }
 });

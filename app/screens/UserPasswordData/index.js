@@ -18,15 +18,30 @@ import { FontAwesome } from '@expo/vector-icons';
 import InputField from './components/InputField';
 import PasswordInputField from './components/PasswordInputField';
 import ModalCategories from './components/ModalCategories';
-import { vault } from '../../data/vault';
+import { vault } from '../../data/Vault';
+import { getAccountProviders } from '../../../api/brands';
 
 function UserPasswordData({ route, navigation }) {
 
-  const { passwordId, action } = route.params;
+  const { passwordId = null, action } = route.params;
   const [formMode, setFormMode] = useState(action);
   const [modalCategoriesIsOpen, setModalCategoriesIsOpen] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const toast = useToast();
+
+  const copyToClipboard = async (text) => {
+    await Clipboard.setStringAsync(text);
+    toast.show({
+      description: "User copied"
+    });
+  };
+
+  var accountProviders = [];
+  useEffect(() => {
+    getAccountProviders().then(providers => {
+      accountProviders = providers;
+    });
+  }, []);
 
   useEffect(() => navigation.addListener(
     'beforeRemove', e => {
@@ -56,32 +71,6 @@ function UserPasswordData({ route, navigation }) {
     }
   ), [hasUnsavedChanges, navigation]);
 
-  var register = vault.registerById(passwordId)
-  var formInitialValues = {
-    logo: register?.logo ?? "",
-    accountName: register?.accountName ?? "",
-    website: register?.website ?? "",
-    user: register?.user ?? "",
-    password: register?.password ?? "",
-    passwordStrength: register?.passwordStrength ?? 0,
-    category: register?.category ?? ""
-  }
-
-  const copyToClipboard = async (text) => {
-    await Clipboard.setStringAsync(text);
-    toast.show({
-      description: "User copied"
-    });
-  };
-
-  let formSchema = object({
-    accountName: string().required("Required field"),
-    website: string().required("Required field"),
-    user: string().required("Required field"),
-    password: string().required("Required field"),
-    category: string().required("Required field")
-  });
-
   // useLayoutEffect(() => {
   //   navigation.setOptions({
   //     headerRight: () => (
@@ -101,21 +90,38 @@ function UserPasswordData({ route, navigation }) {
   //   });
   // }, [navigation, formMode]);
 
+  var register = (passwordId === null) ? null : vault.registerById(passwordId);
+  var formInitialValues = {
+    logo: register?.logo ?? "",
+    accountName: register?.accountName ?? "",
+    website: register?.website ?? "",
+    user: register?.user ?? "",
+    password: register?.password ?? "",
+    passwordStrength: register?.passwordStrength ?? 0,
+    category: register?.category ?? ""
+  }
+
+  let formSchema = object({
+    accountName: string().required("Required field"),
+    website: string().required("Required field"),
+    user: string().required("Required field"),
+    password: string().required("Required field"),
+    category: string().required("Required field")
+  });
+
   const submitForm = values => {
     if (formMode == "edit") {
       // TO DO: Actions to edit a register
       setFormMode("view");
     } else {
       vault.newRegister(values)
-        .then(
-          (message) => {
-            setFormMode("view");
-            toast.show({
-              description: "Password Saved"
-            });
-          },
-          error => console.log("Error:", error)
-        );
+        .then(() => {
+          setFormMode("view");
+          toast.show({
+            description: "Password Saved"
+          });
+        })
+        .catch(error => console.error(error));
     }
   }
 
@@ -152,7 +158,7 @@ function UserPasswordData({ route, navigation }) {
                   onBlur={handleBlur("accountName")}
                   hasChanged={setHasUnsavedChanges}
                   rightElement={(formMode !== "view" ? true : false) &&
-                    <Button variant="ghost" onPress={() => navigation.navigate("ServicesModal", { values: values, setValues: setValues })} >
+                    <Button variant="ghost" onPress={() => navigation.navigate("ServicesModal", { accountProviders: accountProviders, values: values, setValues: setValues })}>
                       Select from list
                     </Button>
                   }

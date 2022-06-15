@@ -1,35 +1,31 @@
 import { Timestamp } from "firebase/firestore";
 import { v5 as uuidv5 } from 'uuid';
 
-import { createUserPasswordData, getAllEncryptedData } from "../../api/userPasswordData";
+import { auth } from "../../api/firebaseConfig";
+import { getAllEncryptedData, writePasswordRegister } from "../../api/userPasswordData";
 
 class Vault {
   #cryptedVault;
   #decryptedVault;
-  #USER_ID = "1b671a64-40d5-491e-99b0-da01ff1f3341"
-  #setDecryptedData;
+  #USER_ID = "";
 
   /**
    * Initialise the Vault fetching all the encrypted data from the database.
    * 
    * @returns True|False - Final state of the fetching.
    */
-  async init(setDecryptedData) {
+  async init() {
     var success = false;
-    this.#setDecryptedData = setDecryptedData;
-    await getAllEncryptedData()
+    this.#USER_ID = auth.currentUser.uid;
+    await getAllEncryptedData(this.#USER_ID)
       .then(
         data => {
-          // console.log(data);
           this.#cryptedVault = data;
           this.#decryptedVault = data;
-          this.#setDecryptedData(this.#decryptedVault);
           success = !success;
-        },
-        error => {
-          console.log(error);
-        }
-      );
+        })
+      .catch(error => console.error(error));
+
     return success
   }
 
@@ -39,7 +35,9 @@ class Vault {
    * @returns {array} Array with objects
    */
   allDecryptedData() {
-    return this.#decryptedVault;
+
+    let decryptedData = this.#decryptedVault;
+    return decryptedData
   }
 
   /**
@@ -49,40 +47,38 @@ class Vault {
    * @returns Object
    */
   registerById(id) {
+    // console.log(this.#USER_ID);
     const register = this.#decryptedVault.filter(object => object.id == id);
     return register[0]
   }
 
   /**
    * Save the new register in the local variable (state) and 
-   * call the API to add a new document.
+   * call the API to add a new document in Firestore.
    * 
    * @param {object} data 
    * @returns True
    */
   async newRegister(data) {
+    // console.log(this.#USER_ID);
     var status = false;
     var tempRegister = {
       ...data,
       dataType: "password",
-      accountType: data.accountName,
+      accountProvider: data.accountName,
       createTimestamp: Timestamp.now(),
       updateTimestamp: Timestamp.now(),
-      id: uuidv5(Timestamp.now().valueOf(), this.#USER_ID)
+      id: uuidv5(Timestamp.now().valueOf(), '1b671a64-40d5-491e-99b0-da01ff1f3341')
     }
 
-    console.log(tempRegister);
     this.#decryptedVault.push(tempRegister);
-    this.#setDecryptedData(this.#decryptedVault);
-    createUserPasswordData(tempRegister)
-      .then(
-        message => status = true,
-        error => console.log(error)
-      );
+    await writePasswordRegister(this.#USER_ID, tempRegister)
+      .then(() => status = true)
+      .catch(error => console.error(error));
 
-    return true
+    return status
   }
 
 }
 
-export var vault = new Vault();
+export var vault = new Vault()

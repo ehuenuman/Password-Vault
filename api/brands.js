@@ -1,9 +1,34 @@
-import { getFirestore, collection, addDoc, getDocs } from "firebase/firestore";
+import { collection, addDoc, getDocs, orderBy, query } from "firebase/firestore";
 
-import { app } from "./firebaseConfig";
+import { firestore } from "./firebaseConfig";
 import { BrandFetchKey } from "./keys";
 
-const db = getFirestore(app);
+/**
+ * Get the data about account providers. The data includes the name, website, and logo.
+ * 
+ * @returns Array with the Account Providers data
+ */
+export async function getAccountProviders() {
+  var accountProviders = [];
+  try {
+    const q = query(collection(firestore, "brands"), orderBy("name"));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+      accountProviders.push({
+        name: doc.data().name,
+        domain: doc.data().domain,
+        logos: doc.data().logos
+      })
+    });
+  } catch (error) {
+    console.error(error);
+  }
+  return accountProviders;
+}
+
+/**
+ * TO FILL UP THE ACCOUNT PRORVIDERS DATA
+ */
 var myHeaders = new Headers();
 myHeaders.append("Authorization", "Bearer " + BrandFetchKey);
 myHeaders.append("Content-Type", "application/json");
@@ -17,25 +42,18 @@ var requestOptions = {
 const fetchBrandByURL = () => {
   //console.log("Length: ", brands.length)
   brands.forEach(brandURL => {
-    console.log(brandURL);
+    // console.log(brandURL);
     fetch("https://api.brandfetch.io/v2/brands/" + brandURL, requestOptions)
       .then(response => response.json())
-      .then(result => storeBrand(result))
+      .then(result => saveBrand(result))
       .catch(error => console.log('error', error));
   });
 }
 
-async function storeBrand(brandData) {
-  // console.log(typeof (brandData), JSON.stringify(brandData));
+const saveBrand = async brandData => {
   if (brandData.logos.length > 0) {
-    const brand = {
-      name: brandData.name,
-      domain: brandData.domain,
-      colors: brandData.colors,
-      logos: brandData.logos
-    }
     try {
-      const docRef = await addDoc(collection(db, "Brands"), brandData);
+      const docRef = await addDoc(collection(firestore, "brands"), brandData);
       console.log("Document written with ID: ", docRef.id);
     } catch (e) {
       console.error("Error adding document: ", e);
@@ -43,20 +61,6 @@ async function storeBrand(brandData) {
   } else {
     console.log("Brand without logos");
   }
-}
-
-export default async function getAllBrands() {
-  // console.log("Fetching brands");
-  var brands = [];
-  const querySnapshot = await getDocs(collection(db, "Brands"));
-  querySnapshot.forEach((doc) => {
-    brands.push({
-      name: doc.data().name,
-      domain: doc.data().domain,
-      logos: doc.data().logos
-    })
-  });
-  return brands;
 }
 
 const brands = [

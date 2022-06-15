@@ -15,7 +15,7 @@ export default function Footer() {
         icon={
           <Icon as={Ionicons} name="add" size={10} />
         }
-        onPress={() => navigation.navigate("UserPasswordData")}
+        onPress={() => navigation.navigate("UserPasswordData", { action: "new" })}
       />
     </Box>
   )

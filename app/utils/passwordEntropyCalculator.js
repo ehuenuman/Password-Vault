@@ -13,6 +13,7 @@ export const getPasswordEntropy = password => {
     lowerCaseLetters: 26,
     specialSymbols: 34
   }
+  /* Site to test RegExp: https://regex101.com */
   const regularExp = {
     // contains_alphaNumeric : /^(?!-)(?!.*-)[A-Za-z0-9-]+(?<!-)$/,
     // onlyLetters : /^[A-Za-z]+$/,
@@ -21,7 +22,7 @@ export const getPasswordEntropy = password => {
     numbers: /\d+/,
     upperCaseLetters: /[A-Z]/,
     lowerCaseLetters: /[a-z]/,
-    specialSymbols: /[!"#$%&'()*+,-.\/:;<=>?@\[\]\\^_`{|}~]/
+    specialSymbols: /[!"#$%&'()*+,\-.\/:;<=>?@\[\]\\^_`{|}~]/
   }
 
   if (lengthPassword > 0) {
