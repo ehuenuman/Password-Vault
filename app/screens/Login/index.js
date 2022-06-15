@@ -124,7 +124,7 @@ function Login({ route, navigation }) {
               </VStack>
             </VStack>
           </VStack>
-          <Button onPress={handleSubmit} isLoading={isSubmitting} isLoadingText="LOGING IN" mt="4">
+          <Button onPress={handleSubmit} isLoading={isSubmitting} isLoadingText="LOGGING IN" mt="4">
             Continue
           </Button>
         </ScrollView>
