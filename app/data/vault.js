@@ -60,7 +60,7 @@ class Vault {
    * @returns True
    */
   async newRegister(data) {
-    console.log(this.#USER_ID);
+    // console.log(this.#USER_ID);
     var status = false;
     var tempRegister = {
       ...data,
