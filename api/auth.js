@@ -1,4 +1,4 @@
-import { signInAnonymously, createUserWithEmailAndPassword, signOut, updateProfile, signInWithEmailAndPassword } from "firebase/auth";
+import { signInAnonymously, createUserWithEmailAndPassword, signOut, updateProfile, signInWithEmailAndPassword, getAuth } from "firebase/auth";
 import * as Crypto from 'expo-crypto';
 import * as SecureStore from 'expo-secure-store';
 
@@ -66,18 +66,20 @@ export async function signInUser(userData) {
  * @return The token of the newly registered user.
  */
 export async function signUpUser(newUserData) {
-  // const hash = await sha512(newUserData.masterPassword)
-  //   .catch(error => console.error(error));
-  return createUserWithEmailAndPassword(auth, newUserData.email, newUserData.masterPassword)
+  let userToken = "";
+  await createUserWithEmailAndPassword(auth, newUserData.email, newUserData.masterPassword)
     .then(async userCredential => {
       await updateProfile(userCredential.user, { displayName: newUserData.userName })
         .catch(error => console.error(error));
-      await createUserDatabase(userCredential.user, newUserData);
-      return userCredential.user.getIdToken()
+      await createUserDatabase(userCredential.user, newUserData)
+        .catch(error => console.error(error));
+      userToken = userCredential.user.getIdToken()
         .then(userToken => userToken)
         .catch(error => console.error(error));
     })
     .catch(error => console.error(error.code + " | " + error.message));
+
+  return userToken;
 }
 
 /**
