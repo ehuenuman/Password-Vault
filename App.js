@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
-import * as SecureStore from 'expo-secure-store';
 import { NavigationContainer } from '@react-navigation/native';
 import { CardStyleInterpolators, createStackNavigator } from '@react-navigation/stack';
 import { NativeBaseProvider, Box, Image, Center } from 'native-base';
+import { onAuthStateChanged } from 'firebase/auth';
 
 import { auth } from './api/firebaseConfig';
 import { signInUser, signOutUser, signUpUser } from './api/auth';
@@ -20,6 +20,7 @@ import Login from './app/screens/Login';
 export default function App() {
 
   const [appIsReady, setAppIsReady] = useState(false);
+  // const auth = getAuth();
 
   const [state, dispatch] = useReducer(
     (prevState, action) => {
@@ -28,7 +29,6 @@ export default function App() {
           return {
             ...prevState,
             userToken: action.token,
-            isLoading: false,
           };
         case "SIGN_IN":
           return {
@@ -45,7 +45,6 @@ export default function App() {
       }
     },
     {
-      isLoading: true,
       isSignout: false,
       userToken: null,
     }
@@ -53,22 +52,11 @@ export default function App() {
 
   useEffect(() => {
     const prepare = async () => {
-      let userToken;
-      let user = auth.currentUser;
       try {
         await SplashScreen.preventAutoHideAsync();
-        // userToken = await SecureStore.getItemAsync("userToken");
-
-        if (user !== null) {
-          await vault.init().then(response => {
-            response && setAppIsReady(true);
-          });
-        }
-
       } catch (error) {
         console.error(error);
       }
-      setAppIsReady(true);
     }
 
     prepare();
@@ -77,34 +65,56 @@ export default function App() {
   const authContext = useMemo(
     () => ({
       signIn: async (data) => {
-        let response = "OK";
-        const loginObject = await signInUser(data).catch(e => console.error(e));
+        let message = "OK";
+        await signInUser(data)
+          .then(response => {
+            if (response.isValid) {
+              vault.init().then(successful => {
+                successful && dispatch({ type: "SIGN_IN", token: response.message });
+              })
+                .catch(error => console.error(error));
+            } else {
+              message = loginObject.message;
+            }
+          })
+          .catch(e => console.error(e));
 
-        if (loginObject.isValid) {
-          // console.log(loginObject.message);
-          // await SecureStore.setItemAsync("userToken", loginObject.message);
-          await vault.init();
-          // dispatch({ type: "SIGN_IN", token: loginObject.message });
-        } else {
-          response = loginObject.message;
-        }
-
-        return response
+        return message
       },
       signOut: async () => {
-        // console.log("Sign out");
         signOutUser();
-        // await SecureStore.deleteItemAsync("userToken");
-        // dispatch({ type: "SIGN_OUT" });
+        dispatch({ type: "SIGN_OUT" });
       },
       signUp: async (data) => {
-        const userToken = await signUpUser(data).catch(e => console.error(e));
-        // await SecureStore.setItemAsync("userToken", userToken);
-        // dispatch({ type: "SIGN_IN", token: userToken });
+        signUpUser(data)
+          .then(userToken => dispatch({ type: "SIGN_IN", token: userToken }))
+          .catch(e => console.error(e));
       },
     }),
     []
   );
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      // console.log(user.displayName, "logged");
+      if (state.userToken === null) {
+        vault.init()
+          .then(successful => {
+            if (successful) {
+              user.getIdToken()
+                .then(userToken => {
+                  dispatch({ type: "RESTORE_TOKEN", token: userToken });
+                  setAppIsReady(true);
+                })
+                .catch(error => console.error(error));
+            }
+          })
+          .catch(error => console.error(error));
+      }
+    } else {
+      console.log("User signed out");
+    }
+  });
 
   const onLayoutRootView = useCallback(async () => {
     if (appIsReady) {
@@ -133,7 +143,7 @@ export default function App() {
               }}
             >
               {
-                auth.currentUser === null ? (
+                state.userToken === null ? (
                   <Stack.Group>
                     <Stack.Screen name="Welcome" component={Welcome} options={{ headerShown: false }} />
                     <Stack.Screen name="CreateAccount" component={CreateAccount} initialParams={{ email: "" }} options={{ title: "", headerShadowVisible: false }} />
