@@ -1,25 +1,36 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { TouchableOpacity, LogBox } from 'react-native';
 import { Avatar, Box, FlatList, HStack, Icon, Input, Text, VStack } from 'native-base';
 import { FontAwesome } from '@expo/vector-icons';
+
+import { getAccountProviders } from './../../../../api/accountProviders';
+import { ACCOUNT_PROVIDERS } from '../../../data/Global';
 
 // TO DO: Fix this!
 LogBox.ignoreLogs([
   'Non-serializable values were found in the navigation state',
 ]);
 
-function ModalSelectService({ route, navigation }) {
-  const { accountProviders, values, setValues } = route.params;
+function SelectAccountProvider({ route, navigation }) {
+  const { values, setValues } = route.params;
   const [searchTerm, setSearchTerm] = useState();
-  const [suggestions, setSuggestions] = useState(accountProviders);
+  const [suggestions, setSuggestions] = useState(ACCOUNT_PROVIDERS);
+
+  var accountProviders;
+  // useEffect(() => {
+  //   getAccountProviders().then(providers => {
+  //     accountProviders = providers;
+  //     setSuggestions(providers);
+  //   });
+  // }, []);
 
   const updateSuggestions = query => {
     setSearchTerm(query);
-    var results = accountProviders.filter(i => i.name.toLowerCase().includes(query.toLowerCase()));
+    let results = ACCOUNT_PROVIDERS.filter(i => i.name.toLowerCase().includes(query.toLowerCase()));
     if (results.length > 0) {
       setSuggestions(results);
     } else {
-      var newService = {
+      let newService = {
         name: query,
         domain: "",
         logo: "newItem"
@@ -32,7 +43,7 @@ function ModalSelectService({ route, navigation }) {
     if (item.logo === "newItem") {
       return ""
     } else {
-      var logo = item.logos.filter(i => i.type === "icon");
+      let logo = item.logos.filter(i => i.type === "icon");
       (logo == 0) && (logo = item.logos.filter(i => i.type === "symbol"));
       (logo == 0) && (logo = item.logos.filter(i => i.type === "logo"));
       return (logo[0].formats[0].src);
@@ -94,4 +105,4 @@ function ModalSelectService({ route, navigation }) {
   )
 }
 
-export default ModalSelectService;
+export default SelectAccountProvider;

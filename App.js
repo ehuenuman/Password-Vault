@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
 import { NavigationContainer } from '@react-navigation/native';
-import { CardStyleInterpolators, createStackNavigator } from '@react-navigation/stack';
+import { CardStyleInterpolators, createStackNavigator, TransitionPresets } from '@react-navigation/stack';
 import { NativeBaseProvider, Box, Image, Center } from 'native-base';
 import { onAuthStateChanged } from 'firebase/auth';
 
@@ -9,10 +9,11 @@ import { auth } from './api/firebaseConfig';
 import { signInUser, signOutUser, signUpUser } from './api/auth';
 import { vault } from './app/data/Vault';
 import { AuthContext } from './app/data/AuthContext';
+import { loadGlobalData } from './app/data/Global';
 import theme from './app/theme/base';
 import PasswordsList from './app/screens/PasswordsList';
 import UserPasswordData from './app/screens/UserPasswordData';
-import ModalSelectService from './app/screens/UserPasswordData/components/ModalSelectService';
+import SelectAccountProvider from './app/screens/UserPasswordData/components/SelectAccountProvider';
 import CreateAccount from './app/screens/CreateAccount';
 import Welcome from './app/screens/IntroSlider';
 import Login from './app/screens/Login';
@@ -20,7 +21,6 @@ import Login from './app/screens/Login';
 export default function App() {
 
   const [appIsReady, setAppIsReady] = useState(false);
-  // const auth = getAuth();
 
   const [state, dispatch] = useReducer(
     (prevState, action) => {
@@ -58,7 +58,7 @@ export default function App() {
         console.error(error);
       }
     }
-
+    loadGlobalData();
     prepare();
   }, []);
 
@@ -138,8 +138,8 @@ export default function App() {
               screenOptions={{
                 headerTitleAlign: "center",
                 headerTintColor: theme.colors.primary[600],
-                cardStyle: { backgroundColor: 'white' },
-                cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS
+                cardStyle: { backgroundColor: "white" },
+                cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
               }}
             >
               {
@@ -159,8 +159,8 @@ export default function App() {
                   </Stack.Group>
                 )
               }
-              <Stack.Group screenOptions={{ presentation: "modal" }}>
-                <Stack.Screen name="ServicesModal" component={ModalSelectService} options={{ headerTitle: "Select a Service" }} />
+              <Stack.Group screenOptions={{ ...TransitionPresets.ModalTransition, }}>
+                <Stack.Screen name="AccountProviders" component={SelectAccountProvider} options={{ headerTitle: "Select your account provider", }} />
               </Stack.Group>
             </Stack.Navigator>
           </NavigationContainer>

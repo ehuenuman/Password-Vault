@@ -19,7 +19,6 @@ import InputField from './components/InputField';
 import PasswordInputField from './components/PasswordInputField';
 import ModalCategories from './components/ModalCategories';
 import { vault } from '../../data/Vault';
-import { getAccountProviders } from '../../../api/accountProviders';
 
 function UserPasswordData({ route, navigation }) {
 
@@ -35,13 +34,6 @@ function UserPasswordData({ route, navigation }) {
       description: "User copied"
     });
   };
-
-  var accountProviders = [];
-  useEffect(() => {
-    getAccountProviders().then(providers => {
-      accountProviders = providers;
-    });
-  }, []);
 
   useEffect(() => navigation.addListener(
     'beforeRemove', e => {
@@ -161,7 +153,7 @@ function UserPasswordData({ route, navigation }) {
                   onBlur={handleBlur("accountName")}
                   hasChanged={setHasUnsavedChanges}
                   rightElement={(formMode !== "view" ? true : false) &&
-                    <Button variant="ghost" onPress={() => navigation.navigate("ServicesModal", { accountProviders: accountProviders, values: values, setValues: setValues })}>
+                    <Button variant="ghost" onPress={() => navigation.navigate("AccountProviders", { values: values, setValues: setValues })}>
                       Select from list
                     </Button>
                   }
