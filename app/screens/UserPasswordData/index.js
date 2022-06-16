@@ -115,11 +115,14 @@ function UserPasswordData({ route, navigation }) {
       setFormMode("view");
     } else {
       vault.newRegister(values)
-        .then(() => {
-          setFormMode("view");
-          toast.show({
-            description: "Password Saved"
-          });
+        .then(success => {
+          if (success) {
+            setFormMode("view");
+            setHasUnsavedChanges(false);
+            toast.show({
+              description: "Password Saved"
+            });
+          } // TO DO: Message that indicates the error to the user.
         })
         .catch(error => console.error(error));
     }

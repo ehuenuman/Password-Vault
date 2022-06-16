@@ -7,10 +7,16 @@ import { firestore } from "./firebaseConfig";
  * 
  * @param {string} userId User ID.
  * @param {object} data An `object` that contains the data to saved in Firestore.
+ * @returns ID for the just created register. If there is some error it returns null.
  */
 export async function writePasswordRegister(userId, data) {
-  const ref = doc(firestore, "users", userId + "/passwords/" + data.id);
-  await setDoc(ref, data);
+  let registerId;
+  const ref = doc(collection(firestore, "users", userId + "/passwords"));
+  registerId = await setDoc(ref, data)
+    .then(() => ref.id)
+    .catch(error => console.error(error));
+
+  return registerId;
 }
 
 /**

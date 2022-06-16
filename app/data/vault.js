@@ -1,5 +1,4 @@
 import { Timestamp } from "firebase/firestore";
-import { v5 as uuidv5 } from 'uuid';
 
 import { auth } from "../../api/firebaseConfig";
 import { getAllEncryptedData, writePasswordRegister } from "../../api/userPasswordData";
@@ -53,32 +52,34 @@ class Vault {
   }
 
   /**
-   * Save the new register in the local variable (state) and 
-   * call the API to add a new document in Firestore.
+   * Call the API to save the new register in Firestore and update the Decrypted Vault.
    * 
    * @param {object} data 
-   * @returns True
+   * @returns A `boolean` that indicates the success of the process.
    */
   async newRegister(data) {
     // console.log(this.#USER_ID);
-    let status = false;
+    let registerSaved = false;
     let tempRegister = {
       ...data,
       dataType: "password",
       accountProvider: data.accountName,
       createTimestamp: Timestamp.now(),
       updateTimestamp: Timestamp.now(),
-      id: uuidv5(Timestamp.now().valueOf(), '1b671a64-40d5-491e-99b0-da01ff1f3341')
     }
 
-    this.#decryptedVault.push(tempRegister);
     await writePasswordRegister(this.#USER_ID, tempRegister)
-      .then(() => status = true)
+      .then(registerId => {
+        if (registerId) {
+          tempRegister.id = registerId;
+          this.#decryptedVault.push(tempRegister);
+          registerSaved = true;
+        }
+      })
       .catch(error => console.error(error));
 
-    return status
+    return registerSaved
   }
-
 }
 
 export var vault = new Vault()
