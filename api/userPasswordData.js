@@ -1,4 +1,4 @@
-import { collection, setDoc, getDocs, doc } from "firebase/firestore";
+import { collection, setDoc, getDocs, doc, query, orderBy } from "firebase/firestore";
 
 import { firestore } from "./firebaseConfig";
 
@@ -26,7 +26,8 @@ export async function writePasswordRegister(userId, data) {
  */
 export async function getAllEncryptedData(userId) {
   const colllectionRef = collection(firestore, "users", userId + "/passwords");
-  const querySnapshot = await getDocs(colllectionRef);
+  const q = query(colllectionRef, orderBy("accountProvider"));
+  const querySnapshot = await getDocs(q);
   var passwords = [];
 
   if (querySnapshot.size > 0) {
