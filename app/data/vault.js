@@ -15,7 +15,7 @@ class Vault {
    * @returns True|False - Final state of the fetching.
    */
   async init() {
-    var success = false;
+    let success = false;
     this.#USER_ID = auth.currentUser.uid;
     await getAllEncryptedData(this.#USER_ID)
       .then(
@@ -61,8 +61,8 @@ class Vault {
    */
   async newRegister(data) {
     // console.log(this.#USER_ID);
-    var status = false;
-    var tempRegister = {
+    let status = false;
+    let tempRegister = {
       ...data,
       dataType: "password",
       accountProvider: data.accountName,
