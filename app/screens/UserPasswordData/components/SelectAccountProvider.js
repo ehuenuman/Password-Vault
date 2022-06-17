@@ -3,7 +3,6 @@ import { TouchableOpacity, LogBox } from 'react-native';
 import { Avatar, Box, FlatList, HStack, Icon, Input, Text, VStack } from 'native-base';
 import { FontAwesome } from '@expo/vector-icons';
 
-import { getAccountProviders } from './../../../../api/accountProviders';
 import { ACCOUNT_PROVIDERS } from '../../../data/Global';
 
 // TO DO: Fix this!
@@ -15,14 +14,6 @@ function SelectAccountProvider({ route, navigation }) {
   const { values, setValues } = route.params;
   const [searchTerm, setSearchTerm] = useState();
   const [suggestions, setSuggestions] = useState(ACCOUNT_PROVIDERS);
-
-  var accountProviders;
-  // useEffect(() => {
-  //   getAccountProviders().then(providers => {
-  //     accountProviders = providers;
-  //     setSuggestions(providers);
-  //   });
-  // }, []);
 
   const updateSuggestions = query => {
     setSearchTerm(query);
