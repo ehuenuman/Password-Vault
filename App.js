@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useReducer, useState } from 're
 import * as SplashScreen from 'expo-splash-screen';
 import { NavigationContainer } from '@react-navigation/native';
 import { CardStyleInterpolators, createStackNavigator, TransitionPresets } from '@react-navigation/stack';
-import { NativeBaseProvider, Box, Image, Center } from 'native-base';
+import { NativeBaseProvider, Box, Center, Image } from 'native-base';
 import { onAuthStateChanged } from 'firebase/auth';
 
 import { auth } from './api/firebaseConfig';
@@ -11,12 +11,12 @@ import { vault } from './app/data/Vault';
 import { AuthContext } from './app/data/AuthContext';
 import { loadGlobalData } from './app/data/Global';
 import theme from './app/theme/base';
-import PasswordsList from './app/screens/PasswordsList';
-import UserPasswordData from './app/screens/UserPasswordData';
-import SelectAccountProvider from './app/screens/UserPasswordData/components/SelectAccountProvider';
 import CreateAccount from './app/screens/CreateAccount';
 import Welcome from './app/screens/IntroSlider';
 import Login from './app/screens/Login';
+import Home from './app/screens/Home';
+import UserPasswordData from './app/screens/UserPasswordData';
+import SelectAccountProviders from './app/screens/UserPasswordData/components/SelectAccountProvider'
 
 export default function App() {
 
@@ -113,6 +113,7 @@ export default function App() {
       }
     } else {
       console.log("User signed out");
+      setAppIsReady(true);
     }
   });
 
@@ -133,36 +134,48 @@ export default function App() {
       <AuthContext.Provider value={authContext}>
         <Box onLayout={onLayoutRootView} flex={1}>
           <NavigationContainer>
-            <Stack.Navigator
-              initialRouteName="Welcome"
-              screenOptions={{
-                headerTitleAlign: "center",
-                headerTintColor: theme.colors.primary[600],
-                cardStyle: { backgroundColor: "white" },
-                cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-              }}
-            >
-              {
-                state.userToken === null ? (
+            {
+              state.userToken === null ? (
+                <Stack.Navigator
+                  initialRouteName="Welcome"
+                  screenOptions={{
+                    headerTitle: "",
+                    headerShadowVisible: false,
+                    headerTintColor: theme.colors.secondary[600],
+                    cardStyle: { backgroundColor: "white" },
+                    cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+                  }}
+                >
                   <Stack.Group>
                     <Stack.Screen name="Welcome" component={Welcome} options={{ headerShown: false }} />
-                    <Stack.Screen name="CreateAccount" component={CreateAccount} initialParams={{ email: "" }} options={{ title: "", headerShadowVisible: false }} />
-                    <Stack.Screen name="FirstLogin" component={Login} initialParams={{ email: "" }} options={{ title: "", headerShadowVisible: false }} />
+                    <Stack.Screen name="CreateAccount" component={CreateAccount} initialParams={{ email: "" }} />
+                    <Stack.Screen name="FirstLogin" component={Login} initialParams={{ email: "" }} />
                   </Stack.Group>
-                ) : (
+                </Stack.Navigator>
+              ) : (
+                <Stack.Navigator
+                  initialRouteName="Home"
+                  screenOptions={{
+                    headerTitleAlign: "center",
+                    headerTintColor: theme.colors.secondary[600],
+                    headerStyle: { shadowColor: theme.colors.tertiary[700] },
+                    cardStyle: { backgroundColor: "white" },
+                    cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+                  }}
+                >
                   <Stack.Group
                     screenOptions={{
                       headerTitle: (props) => <Center {...props}><Image source={require("./app/assets/favicon.png")} alt="Password Vault" size="25px" /></Center>
                     }}>
-                    <Stack.Screen name="Home" component={PasswordsList} />
+                    <Stack.Screen name="Home" component={Home} options={{ headerShown: false }} />
                     <Stack.Screen name="UserPasswordData" component={UserPasswordData} />
                   </Stack.Group>
-                )
-              }
-              <Stack.Group screenOptions={{ ...TransitionPresets.ModalTransition, }}>
-                <Stack.Screen name="AccountProviders" component={SelectAccountProvider} options={{ headerTitle: "Select your account provider", }} />
-              </Stack.Group>
-            </Stack.Navigator>
+                  <Stack.Group screenOptions={{ ...TransitionPresets.ModalTransition, }}>
+                    <Stack.Screen name="AccountProviders" component={SelectAccountProviders} options={{ headerTitle: "Select your account provider", }} />
+                  </Stack.Group>
+                </Stack.Navigator>
+              )
+            }
           </NavigationContainer>
         </Box>
       </AuthContext.Provider>
