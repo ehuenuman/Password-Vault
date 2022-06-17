@@ -27,7 +27,7 @@ function Home({ navigation }) {
       }}
       drawerContent={(props) => <AppDrawerContent {...props} />}
     >
-      <Drawer.Screen name="PasswordsList" component={PasswordsList} />
+      <Drawer.Screen name="PasswordsList" component={PasswordsList} options={{ drawerLabel: "Passwords" }} />
     </Drawer.Navigator>
   );
 }
