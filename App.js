@@ -90,6 +90,7 @@ export default function App() {
           .then(userToken => dispatch({ type: "SIGN_IN", token: userToken }))
           .catch(e => console.error(e));
       },
+      loggedUser: () => auth.currentUser
     }),
     []
   );
