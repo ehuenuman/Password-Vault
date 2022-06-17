@@ -122,7 +122,7 @@ function UserPasswordData({ route, navigation }) {
 
   return (
     <Box flex="1" >
-      <ScrollView keyboardShouldPersistTaps="always">
+      <ScrollView keyboardShouldPersistTaps="handled">
         <Box px="15%">
           <Formik
             initialValues={formInitialValues}
@@ -153,7 +153,7 @@ function UserPasswordData({ route, navigation }) {
                   onBlur={handleBlur("accountName")}
                   hasChanged={setHasUnsavedChanges}
                   rightElement={(formMode !== "view" ? true : false) &&
-                    <Button variant="ghost" onPress={() => navigation.navigate("AccountProviders", { values: values, setValues: setValues })}>
+                    <Button variant="ghost" mr="1" onPress={() => navigation.navigate("AccountProviders", { values: values, setValues: setValues })}>
                       Select from list
                     </Button>
                   }
