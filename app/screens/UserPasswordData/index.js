@@ -1,5 +1,5 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react';
-import { Alert, BackHandler } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Alert } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { Formik } from 'formik';
 import { object, string } from 'yup';
@@ -19,8 +19,6 @@ import InputField from './components/InputField';
 import PasswordInputField from './components/PasswordInputField';
 import ModalCategories from './components/ModalCategories';
 import { vault } from '../../data/Vault';
-import { useFocusEffect } from '@react-navigation/native';
-import { useRef } from 'react';
 
 function UserPasswordData({ route, navigation }) {
 
@@ -28,6 +26,7 @@ function UserPasswordData({ route, navigation }) {
   const [formMode, setFormMode] = useState(action);
   const [modalCategoriesIsOpen, setModalCategoriesIsOpen] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isDeletingPassword, setIsDeletingPassword] = useState(false);
   const toast = useToast();
 
   useEffect(() => {
@@ -134,6 +133,30 @@ function UserPasswordData({ route, navigation }) {
     }
   }
 
+  const deletePassword = () => {
+    Alert.alert(
+      'Are you sure you want to delete the password?',
+      'This action can not be undone.',
+      [
+        { text: "No", style: 'cancel', onPress: () => { } },
+        {
+          text: 'Delete it',
+          style: 'destructive',
+          onPress: () => {
+            setIsDeletingPassword(true);
+            vault.deleteRegister(passwordId)
+              .then(response => {
+                if (response) {
+                  toast.show({ description: "Password deleted" });
+                  navigation.goBack();
+                }
+              });
+          },
+        },
+      ]
+    );
+  }
+
   return (
     <Box flex="1" >
       <ScrollView keyboardShouldPersistTaps="handled">
@@ -229,13 +252,19 @@ function UserPasswordData({ route, navigation }) {
                 <ModalCategories isOpen={modalCategoriesIsOpen} setShowModal={setModalCategoriesIsOpen} />
                 {
                   (formMode !== "view") &&
-                  <Button mt={10} onPress={handleSubmit} isLoading={isSubmitting} isLoadingText="PROTECTING DATA">
+                  <Button mt="10" onPress={handleSubmit} isLoading={isSubmitting} isLoadingText="PROTECTING DATA">
                     SAVE
                   </Button>
                 }
               </VStack>
             )}
           </Formik>
+          {
+            (formMode === "edit") &&
+            <Button variant="ghost" colorScheme="danger" mt="10" isLoading={isDeletingPassword} isLoadingText="DELETING PASSWORD" onPress={() => deletePassword()} >
+              Delete
+            </Button>
+          }
         </Box>
       </ScrollView>
     </Box>
