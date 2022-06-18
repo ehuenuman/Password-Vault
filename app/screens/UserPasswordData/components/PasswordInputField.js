@@ -59,6 +59,7 @@ function PasswordInputField({
         rightElement={
           <Box
             flexDirection="row"
+            mr="1"
           >
             <IconButton
               icon={<Icon as={FontAwesome} name={showPassword ? "eye" : "eye-slash"} />}

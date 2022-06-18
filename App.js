@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
 import { NavigationContainer } from '@react-navigation/native';
-import { CardStyleInterpolators, createStackNavigator, TransitionPresets } from '@react-navigation/stack';
+import { CardStyleInterpolators, createStackNavigator } from '@react-navigation/stack';
 import { NativeBaseProvider, Box, Center, Image } from 'native-base';
 import { onAuthStateChanged } from 'firebase/auth';
 
@@ -90,6 +90,7 @@ export default function App() {
           .then(userToken => dispatch({ type: "SIGN_IN", token: userToken }))
           .catch(e => console.error(e));
       },
+      loggedUser: () => auth.currentUser
     }),
     []
   );
@@ -160,17 +161,17 @@ export default function App() {
                     headerTintColor: theme.colors.secondary[600],
                     headerStyle: { shadowColor: theme.colors.tertiary[700] },
                     cardStyle: { backgroundColor: "white" },
-                    cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
                   }}
                 >
                   <Stack.Group
                     screenOptions={{
-                      headerTitle: (props) => <Center {...props}><Image source={require("./app/assets/favicon.png")} alt="Password Vault" size="25px" /></Center>
+                      headerTitle: (props) => <Center {...props}><Image source={require("./app/assets/favicon.png")} alt="Password Vault" size="25px" /></Center>,
+                      cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
                     }}>
                     <Stack.Screen name="Home" component={Home} options={{ headerShown: false }} />
                     <Stack.Screen name="UserPasswordData" component={UserPasswordData} />
                   </Stack.Group>
-                  <Stack.Group screenOptions={{ ...TransitionPresets.ModalTransition, }}>
+                  <Stack.Group screenOptions={{ presentation: "modal" }}>
                     <Stack.Screen name="AccountProviders" component={SelectAccountProviders} options={{ headerTitle: "Select your account provider", }} />
                   </Stack.Group>
                 </Stack.Navigator>

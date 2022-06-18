@@ -1,7 +1,7 @@
 import { Timestamp } from "firebase/firestore";
 
 import { auth } from "../../api/firebaseConfig";
-import { getAllEncryptedData, writePasswordRegister } from "../../api/userPasswordData";
+import { deletePasswordRegister, getAllEncryptedData, writePasswordRegister } from "../../api/userPasswordData";
 
 class Vault {
   #cryptedVault;
@@ -55,7 +55,7 @@ class Vault {
    * Call the API to save the new register in Firestore and update the Decrypted Vault.
    * 
    * @param {object} data 
-   * @returns A `boolean` that indicates the success of the process.
+   * @returns A `boolean` indicates the success of the creation process.
    */
   async newRegister(data) {
     // console.log(this.#USER_ID);
@@ -80,6 +80,23 @@ class Vault {
 
     return registerSaved
   }
+
+  /**
+   * Call the API to delete a register identified by ID.
+   * 
+   * @param {string} id Password's ID.
+   * @return A `boolean` indicates the success of the deleting process.
+   */
+  async deleteRegister(id) {
+    return deletePasswordRegister(this.#USER_ID, id)
+      .then(response => {
+        if (response) {
+          this.#decryptedVault = this.#decryptedVault.filter(object => object.id !== id);
+        }
+        return response;
+      });
+  }
 }
+
 
 export var vault = new Vault()

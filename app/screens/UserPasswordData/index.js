@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Alert } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { Formik } from 'formik';
@@ -26,20 +26,35 @@ function UserPasswordData({ route, navigation }) {
   const [formMode, setFormMode] = useState(action);
   const [modalCategoriesIsOpen, setModalCategoriesIsOpen] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isDeletingPassword, setIsDeletingPassword] = useState(false);
   const toast = useToast();
 
-  const copyToClipboard = async (text) => {
-    await Clipboard.setStringAsync(text);
-    toast.show({
-      description: "User copied"
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Button
+          variant="ghost"
+          onPress={() => {
+            if (formMode == "new") {
+              console.log("New register created");
+            } else {
+              formMode == "view" ? setFormMode("edit") : setFormMode("view");
+            }
+          }}
+        >
+          {(formMode !== "new") && ((formMode === "view") ? "Edit" : "Save")}
+        </Button>
+      ),
     });
-  };
+  }, [navigation, formMode]);
+
+  const formRef = useRef();
 
   useEffect(() => navigation.addListener(
     'beforeRemove', e => {
       const action = e.data.action;
       if (formMode === "view") {
-        return
+        return;
       } else {
         if (!hasUnsavedChanges) {
           // If we don't have unsaved changes, then we don't need to do anything
@@ -55,7 +70,17 @@ function UserPasswordData({ route, navigation }) {
             {
               text: 'Discard',
               style: 'destructive',
-              onPress: () => navigation.dispatch(action),
+              onPress: () => {
+                if (formMode === "new") {
+                  navigation.dispatch(action);
+
+                } else {
+                  formRef.current?.resetForm();
+                  setFormMode("view");
+                  setHasUnsavedChanges(false);
+
+                }
+              },
             },
           ]
         );
@@ -63,24 +88,12 @@ function UserPasswordData({ route, navigation }) {
     }
   ), [hasUnsavedChanges, navigation]);
 
-  // useLayoutEffect(() => {
-  //   navigation.setOptions({
-  //     headerRight: () => (
-  //       <Button
-  //         variant="ghost"
-  //         onPress={() => {
-  //           if (formMode == "new") {
-  //             console.log("New register created");
-  //           } else {
-  //             formMode == "view" ? setFormMode("edit") : setFormMode("view");
-  //           }
-  //         }}
-  //       >
-  //         {(formMode == "view") ? "Edit" : "Save"}
-  //       </Button>
-  //     ),
-  //   });
-  // }, [navigation, formMode]);
+  const copyToClipboard = async (text) => {
+    await Clipboard.setStringAsync(text);
+    toast.show({
+      description: "User copied"
+    });
+  };
 
   var register = (passwordId === null) ? null : vault.registerById(passwordId);
   var formInitialValues = {
@@ -120,14 +133,39 @@ function UserPasswordData({ route, navigation }) {
     }
   }
 
+  const deletePassword = () => {
+    Alert.alert(
+      'Are you sure you want to delete the password?',
+      'This action can not be undone.',
+      [
+        { text: "No", style: 'cancel', onPress: () => { } },
+        {
+          text: 'Delete it',
+          style: 'destructive',
+          onPress: () => {
+            setIsDeletingPassword(true);
+            vault.deleteRegister(passwordId)
+              .then(response => {
+                if (response) {
+                  toast.show({ description: "Password deleted" });
+                  navigation.goBack();
+                }
+              });
+          },
+        },
+      ]
+    );
+  }
+
   return (
     <Box flex="1" >
-      <ScrollView keyboardShouldPersistTaps="always">
+      <ScrollView keyboardShouldPersistTaps="handled">
         <Box px="15%">
           <Formik
             initialValues={formInitialValues}
             validationSchema={formSchema}
             onSubmit={values => submitForm(values)}
+            innerRef={formRef}
           >
             {({ handleChange, handleBlur, handleSubmit, values, setValues, isSubmitting }) => (
               <VStack maxWidth="300px">
@@ -153,7 +191,7 @@ function UserPasswordData({ route, navigation }) {
                   onBlur={handleBlur("accountName")}
                   hasChanged={setHasUnsavedChanges}
                   rightElement={(formMode !== "view" ? true : false) &&
-                    <Button variant="ghost" onPress={() => navigation.navigate("AccountProviders", { values: values, setValues: setValues })}>
+                    <Button variant="ghost" mr="1" onPress={() => navigation.navigate("AccountProviders", { values: values, setValues: setValues })}>
                       Select from list
                     </Button>
                   }
@@ -213,14 +251,20 @@ function UserPasswordData({ route, navigation }) {
                 />
                 <ModalCategories isOpen={modalCategoriesIsOpen} setShowModal={setModalCategoriesIsOpen} />
                 {
-                  (formMode != "view") &&
-                  <Button mt={10} onPress={handleSubmit} isLoading={isSubmitting} isLoadingText="PROTECTING DATA">
+                  (formMode !== "view") &&
+                  <Button mt="10" onPress={handleSubmit} isLoading={isSubmitting} isLoadingText="PROTECTING DATA">
                     SAVE
                   </Button>
                 }
               </VStack>
             )}
           </Formik>
+          {
+            (formMode === "edit") &&
+            <Button variant="ghost" colorScheme="danger" mt="10" isLoading={isDeletingPassword} isLoadingText="DELETING PASSWORD" onPress={() => deletePassword()} >
+              Delete
+            </Button>
+          }
         </Box>
       </ScrollView>
     </Box>

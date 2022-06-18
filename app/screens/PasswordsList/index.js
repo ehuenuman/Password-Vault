@@ -1,19 +1,14 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { useIsFocused } from '@react-navigation/native';
 import { Avatar, Box, FlatList, HStack, Icon, IconButton, Text, VStack } from 'native-base';
 import { Ionicons } from '@expo/vector-icons';
 
 import Footer from './components/Footer';
-import { AuthContext } from '../../data/AuthContext';
 import { vault } from '../../data/Vault';
 
-function PasswordsList({ route, navigation }) {
+function PasswordsList({ navigation }) {
 
-  const { signOut } = useContext(AuthContext);
   const isFocused = useIsFocused();
-
-
-  // signOut();
 
   return (
     <VStack flex="1">

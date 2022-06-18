@@ -1,4 +1,4 @@
-import { collection, setDoc, getDocs, doc, query, orderBy } from "firebase/firestore";
+import { collection, setDoc, getDocs, doc, query, orderBy, deleteDoc } from "firebase/firestore";
 
 import { firestore } from "./firebaseConfig";
 
@@ -17,6 +17,23 @@ export async function writePasswordRegister(userId, data) {
     .catch(error => console.error(error));
 
   return registerId;
+}
+
+/**
+ * Delete a password from the user's collection using the password ID.
+ * 
+ * @param {string} userId User ID.
+ * @param {string} id Password ID.
+ * @returns A `boolean` indicates the success of the deleting process.
+ */
+export async function deletePasswordRegister(userId, id) {
+  const userDocumentRef = doc(firestore, "users", userId);
+  return deleteDoc(doc(userDocumentRef, "passwords", id))
+    .then(() => true)
+    .catch(error => {
+      console.error(error);
+      return false;
+    });
 }
 
 /**
