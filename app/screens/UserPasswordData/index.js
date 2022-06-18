@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Alert } from 'react-native';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
+import { Alert, BackHandler } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { Formik } from 'formik';
 import { object, string } from 'yup';
@@ -19,6 +19,8 @@ import InputField from './components/InputField';
 import PasswordInputField from './components/PasswordInputField';
 import ModalCategories from './components/ModalCategories';
 import { vault } from '../../data/Vault';
+import { useFocusEffect } from '@react-navigation/native';
+import { useRef } from 'react';
 
 function UserPasswordData({ route, navigation }) {
 
@@ -28,18 +30,32 @@ function UserPasswordData({ route, navigation }) {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const toast = useToast();
 
-  const copyToClipboard = async (text) => {
-    await Clipboard.setStringAsync(text);
-    toast.show({
-      description: "User copied"
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Button
+          variant="ghost"
+          onPress={() => {
+            if (formMode == "new") {
+              console.log("New register created");
+            } else {
+              formMode == "view" ? setFormMode("edit") : setFormMode("view");
+            }
+          }}
+        >
+          {(formMode !== "new") && ((formMode === "view") ? "Edit" : "Save")}
+        </Button>
+      ),
     });
-  };
+  }, [navigation, formMode]);
+
+  const formRef = useRef();
 
   useEffect(() => navigation.addListener(
     'beforeRemove', e => {
       const action = e.data.action;
       if (formMode === "view") {
-        return
+        return;
       } else {
         if (!hasUnsavedChanges) {
           // If we don't have unsaved changes, then we don't need to do anything
@@ -55,7 +71,17 @@ function UserPasswordData({ route, navigation }) {
             {
               text: 'Discard',
               style: 'destructive',
-              onPress: () => navigation.dispatch(action),
+              onPress: () => {
+                if (formMode === "new") {
+                  navigation.dispatch(action);
+
+                } else {
+                  formRef.current?.resetForm();
+                  setFormMode("view");
+                  setHasUnsavedChanges(false);
+
+                }
+              },
             },
           ]
         );
@@ -63,24 +89,12 @@ function UserPasswordData({ route, navigation }) {
     }
   ), [hasUnsavedChanges, navigation]);
 
-  // useLayoutEffect(() => {
-  //   navigation.setOptions({
-  //     headerRight: () => (
-  //       <Button
-  //         variant="ghost"
-  //         onPress={() => {
-  //           if (formMode == "new") {
-  //             console.log("New register created");
-  //           } else {
-  //             formMode == "view" ? setFormMode("edit") : setFormMode("view");
-  //           }
-  //         }}
-  //       >
-  //         {(formMode == "view") ? "Edit" : "Save"}
-  //       </Button>
-  //     ),
-  //   });
-  // }, [navigation, formMode]);
+  const copyToClipboard = async (text) => {
+    await Clipboard.setStringAsync(text);
+    toast.show({
+      description: "User copied"
+    });
+  };
 
   var register = (passwordId === null) ? null : vault.registerById(passwordId);
   var formInitialValues = {
@@ -128,6 +142,7 @@ function UserPasswordData({ route, navigation }) {
             initialValues={formInitialValues}
             validationSchema={formSchema}
             onSubmit={values => submitForm(values)}
+            innerRef={formRef}
           >
             {({ handleChange, handleBlur, handleSubmit, values, setValues, isSubmitting }) => (
               <VStack maxWidth="300px">
@@ -213,7 +228,7 @@ function UserPasswordData({ route, navigation }) {
                 />
                 <ModalCategories isOpen={modalCategoriesIsOpen} setShowModal={setModalCategoriesIsOpen} />
                 {
-                  (formMode != "view") &&
+                  (formMode !== "view") &&
                   <Button mt={10} onPress={handleSubmit} isLoading={isSubmitting} isLoadingText="PROTECTING DATA">
                     SAVE
                   </Button>
