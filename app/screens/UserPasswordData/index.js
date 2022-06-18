@@ -29,64 +29,43 @@ function UserPasswordData({ route, navigation }) {
   const [isDeletingPassword, setIsDeletingPassword] = useState(false);
   const toast = useToast();
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <Button
-          variant="ghost"
-          onPress={() => {
-            if (formMode == "new") {
-              console.log("New register created");
-            } else {
-              formMode == "view" ? setFormMode("edit") : setFormMode("view");
-            }
-          }}
-        >
-          {(formMode !== "new") && ((formMode === "view") ? "Edit" : "Save")}
-        </Button>
-      ),
-    });
-  }, [navigation, formMode]);
-
   const formRef = useRef();
 
   useEffect(() => navigation.addListener(
     'beforeRemove', e => {
       const action = e.data.action;
-      if (formMode === "view") {
-        return;
-      } else {
-        if (!hasUnsavedChanges) {
-          // If we don't have unsaved changes, then we don't need to do anything
-          return;
-        }
+      if (formMode === "new" || formMode === "edit") {
         e.preventDefault();
+        if (hasUnsavedChanges) {
+          Alert.alert(
+            'Discard changes?',
+            'You have unsaved changes. Are you sure to discard them and go back?',
+            [
+              { text: "Don't leave", style: 'cancel', onPress: () => { } },
+              {
+                text: 'Discard',
+                style: 'destructive',
+                onPress: () => {
+                  if (formMode === "new") {
+                    navigation.dispatch(action);
 
-        Alert.alert(
-          'Discard changes?',
-          'You have unsaved changes. Are you sure to discard them and go back?',
-          [
-            { text: "Don't leave", style: 'cancel', onPress: () => { } },
-            {
-              text: 'Discard',
-              style: 'destructive',
-              onPress: () => {
-                if (formMode === "new") {
-                  navigation.dispatch(action);
-
-                } else {
-                  formRef.current?.resetForm();
-                  setFormMode("view");
-                  setHasUnsavedChanges(false);
-
-                }
+                  } else {
+                    formRef.current?.resetForm();
+                    setFormMode("view");
+                    setHasUnsavedChanges(false);
+                  }
+                },
               },
-            },
-          ]
-        );
+            ]
+          );
+        } else {
+          (formMode === "edit") && setFormMode("view");
+        }
+      } else {
+        return;
       }
     }
-  ), [hasUnsavedChanges, navigation]);
+  ), [hasUnsavedChanges, formMode, navigation]);
 
   const copyToClipboard = async (text) => {
     await Clipboard.setStringAsync(text);
@@ -114,12 +93,21 @@ function UserPasswordData({ route, navigation }) {
     category: string().required("Required field")
   });
 
-  const submitForm = values => {
+  const submitForm = async values => {
     if (formMode == "edit") {
       // TO DO: Actions to edit a register
-      setFormMode("view");
+      await vault.updateRegister(passwordId, values)
+        .then(sucess => {
+          if (sucess) {
+            setFormMode("view");
+            setHasUnsavedChanges(false);
+            toast.show({
+              description: "Password Updated"
+            });
+          } // TO DO: Message that indicates the error to the user.
+        });
     } else {
-      vault.newRegister(values)
+      await vault.newRegister(values)
         .then(success => {
           if (success) {
             setFormMode("view");
@@ -147,7 +135,7 @@ function UserPasswordData({ route, navigation }) {
             vault.deleteRegister(passwordId)
               .then(response => {
                 if (response) {
-                  toast.show({ description: "Password deleted" });
+                  toast.show({ description: "Password Deleted" });
                   navigation.goBack();
                 }
               });
@@ -164,7 +152,7 @@ function UserPasswordData({ route, navigation }) {
           <Formik
             initialValues={formInitialValues}
             validationSchema={formSchema}
-            onSubmit={values => submitForm(values)}
+            onSubmit={async values => submitForm(values)}
             innerRef={formRef}
           >
             {({ handleChange, handleBlur, handleSubmit, values, setValues, isSubmitting }) => (
@@ -259,12 +247,20 @@ function UserPasswordData({ route, navigation }) {
               </VStack>
             )}
           </Formik>
-          {
-            (formMode === "edit") &&
-            <Button variant="ghost" colorScheme="danger" mt="10" isLoading={isDeletingPassword} isLoadingText="DELETING PASSWORD" onPress={() => deletePassword()} >
-              Delete
-            </Button>
-          }
+          <Box mt="10" mb="10%">
+            {
+              (formMode === "view") &&
+              <Button variant="outline" colorScheme="secondary" isLoading={isDeletingPassword} isLoadingText="DELETING PASSWORD" onPress={() => setFormMode("edit")} >
+                Edit
+              </Button>
+            }
+            {
+              (formMode === "edit") &&
+              <Button variant="ghost" colorScheme="danger" isLoading={isDeletingPassword} isLoadingText="DELETING PASSWORD" onPress={() => deletePassword()} >
+                Delete
+              </Button>
+            }
+          </Box>
         </Box>
       </ScrollView>
     </Box>
