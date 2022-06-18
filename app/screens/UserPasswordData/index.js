@@ -15,10 +15,10 @@ import {
 } from 'native-base';
 import { FontAwesome } from '@expo/vector-icons';
 
+import { vault } from '../../data/Vault';
 import InputField from './components/InputField';
 import PasswordInputField from './components/PasswordInputField';
 import ModalCategories from './components/ModalCategories';
-import { vault } from '../../data/Vault';
 
 function UserPasswordData({ route, navigation }) {
 
