@@ -1,4 +1,4 @@
-import { collection, setDoc, getDocs, doc, query, orderBy, deleteDoc } from "firebase/firestore";
+import { collection, setDoc, getDocs, doc, query, orderBy, deleteDoc, updateDoc } from "firebase/firestore";
 
 import { firestore } from "./firebaseConfig";
 
@@ -17,6 +17,24 @@ export async function writePasswordRegister(userId, data) {
     .catch(error => console.error(error));
 
   return registerId;
+}
+
+/**
+ * Update a resgister password object in the user's collection.
+ * 
+ * @param {string} userId User ID.
+ * @param {string} passwordId Password ID.
+ * @param {object} data A `object` with the new data
+ * @returns A `boolean` indicates the success of the updating process.
+ */
+export async function updatePasswordRegister(userId, passwordId, data) {
+  const userDocumentRef = doc(firestore, "users", userId);
+  return updateDoc(doc(userDocumentRef, "passwords", passwordId), data)
+    .then(() => true)
+    .catch(error => {
+      console.error(error);
+      return false;
+    });
 }
 
 /**

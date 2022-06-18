@@ -1,7 +1,7 @@
 import { Timestamp } from "firebase/firestore";
 
 import { auth } from "../../api/firebaseConfig";
-import { deletePasswordRegister, getAllEncryptedData, writePasswordRegister } from "../../api/userPasswordData";
+import { deletePasswordRegister, getAllEncryptedData, updatePasswordRegister, writePasswordRegister } from "../../api/userPasswordData";
 
 class Vault {
   #cryptedVault;
@@ -54,7 +54,7 @@ class Vault {
   /**
    * Call the API to save the new register in Firestore and update the Decrypted Vault.
    * 
-   * @param {object} data 
+   * @param {object} data Data to be add into the database.
    * @returns A `boolean` indicates the success of the creation process.
    */
   async newRegister(data) {
@@ -82,7 +82,39 @@ class Vault {
   }
 
   /**
-   * Call the API to delete a register identified by ID.
+   * Call the API to update a register by its ID.
+   * 
+   * @param {string} id Password ID.
+   * @param {object} data A object with the new data.
+   * @returns A `boolean` indicates the success of the updating process.
+   */
+  async updateRegister(id, data) {
+    let registerUpdated = false;
+    delete data.id;
+    let updatedRegister = {
+      ...data,
+      updateTimestamp: Timestamp.now()
+    }
+    await updatePasswordRegister(this.#USER_ID, id, updatedRegister)
+      .then(response => {
+        if (response)
+          this.#decryptedVault = this.#decryptedVault.filter(object => {
+            if (object.id === id) {
+              object = {
+                ...updatedRegister,
+                id: id
+              }
+            }
+            return object;
+          });
+        registerUpdated = response;
+      });
+
+    return registerUpdated;
+  }
+
+  /**
+   * Call the API to delete a register by its ID.
    * 
    * @param {string} id Password's ID.
    * @return A `boolean` indicates the success of the deleting process.
@@ -90,9 +122,8 @@ class Vault {
   async deleteRegister(id) {
     return deletePasswordRegister(this.#USER_ID, id)
       .then(response => {
-        if (response) {
+        if (response)
           this.#decryptedVault = this.#decryptedVault.filter(object => object.id !== id);
-        }
         return response;
       });
   }
