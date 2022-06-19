@@ -34,7 +34,7 @@ function UserPasswordData({ route, navigation }) {
   useEffect(() => navigation.addListener(
     'beforeRemove', e => {
       const action = e.data.action;
-      if (formMode === "new" || formMode === "edit") {
+      if (!isDeletingPassword && (formMode === "new" || formMode === "edit")) {
         e.preventDefault();
         if (hasUnsavedChanges) {
           Alert.alert(
@@ -59,14 +59,14 @@ function UserPasswordData({ route, navigation }) {
             ]
           );
         } else {
-          (formMode === "edit") && setFormMode("view");
           (formMode === "new") && navigation.dispatch(action);
+          (formMode === "edit") && setFormMode("view");
         }
       } else {
         return;
       }
     }
-  ), [hasUnsavedChanges, formMode, navigation]);
+  ), [hasUnsavedChanges, isDeletingPassword, formMode, navigation]);
 
   const copyToClipboard = async (text) => {
     await Clipboard.setStringAsync(text);
@@ -251,7 +251,7 @@ function UserPasswordData({ route, navigation }) {
           <Box mt="10" mb="10%">
             {
               (formMode === "view") &&
-              <Button variant="outline" colorScheme="secondary" isLoading={isDeletingPassword} isLoadingText="DELETING PASSWORD" onPress={() => setFormMode("edit")} >
+              <Button variant="outline" colorScheme="secondary" onPress={() => setFormMode("edit")} >
                 Edit
               </Button>
             }
