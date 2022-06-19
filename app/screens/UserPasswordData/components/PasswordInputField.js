@@ -32,9 +32,10 @@ function PasswordInputField({
 
   const toast = useToast();
   const copyToClipboard = async (text) => {
+    toast.closeAll();
     await Clipboard.setStringAsync(text);
     toast.show({
-      description: "Password copied"
+      description: "Password copied to clipboard"
     });
   };
 

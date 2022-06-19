@@ -34,6 +34,7 @@ function UserPasswordData({ route, navigation }) {
   useEffect(() => navigation.addListener(
     'beforeRemove', e => {
       const action = e.data.action;
+      !isDeletingPassword && toast.closeAll();
       if (!isDeletingPassword && (formMode === "new" || formMode === "edit")) {
         e.preventDefault();
         if (hasUnsavedChanges) {
@@ -69,9 +70,10 @@ function UserPasswordData({ route, navigation }) {
   ), [hasUnsavedChanges, isDeletingPassword, formMode, navigation]);
 
   const copyToClipboard = async (text) => {
+    toast.closeAll();
     await Clipboard.setStringAsync(text);
     toast.show({
-      description: "User copied"
+      description: "User copied to clipboard"
     });
   };
 
@@ -136,7 +138,7 @@ function UserPasswordData({ route, navigation }) {
             vault.deleteRegister(passwordId)
               .then(response => {
                 if (response) {
-                  toast.show({ description: "Password Deleted" });
+                  toast.show({ description: "Password Deleted", duration: 2000 });
                   navigation.goBack();
                 }
               });
