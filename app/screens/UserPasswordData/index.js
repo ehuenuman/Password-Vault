@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, Keyboard } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { Formik } from 'formik';
 import { object, string } from 'yup';
@@ -233,7 +233,10 @@ function UserPasswordData({ route, navigation }) {
                   leftElement={(formMode == "view" ? false : true) &&
                     <Button
                       variant="outline"
-                      onPress={() => setModalCategoriesIsOpen(true)}
+                      onPress={() => {
+                        Keyboard.dismiss();
+                        setModalCategoriesIsOpen(true);
+                      }}
                     >
                       {values.category ? "Change category" : "Select category"}
                     </Button>
