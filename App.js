@@ -74,7 +74,7 @@ export default function App() {
               })
                 .catch(error => console.error(error));
             } else {
-              message = loginObject.message;
+              message = response.message;
             }
           })
           .catch(e => console.error(e));
@@ -149,7 +149,7 @@ export default function App() {
                 >
                   <Stack.Group>
                     <Stack.Screen name="Welcome" component={Welcome} options={{ headerShown: false }} />
-                    <Stack.Screen name="CreateAccount" component={CreateAccount} initialParams={{ email: "" }} />
+                    <Stack.Screen name="CreateAccount" component={CreateAccount} />
                     <Stack.Screen name="FirstLogin" component={Login} initialParams={{ email: "" }} />
                   </Stack.Group>
                 </Stack.Navigator>
