@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from "prop-types";
 import { Box, Center, Modal, Text, VStack } from 'native-base';
-import { TouchableHighlight, TouchableOpacity } from 'react-native';
+import { TouchableOpacity } from 'react-native';
 import { useFormikContext } from 'formik';
 
 const categories = [
@@ -18,7 +18,7 @@ function ModalCategories({
   setShowModal
 }) {
 
-  const { values, setValues, setFieldTouched } = useFormikContext();
+  const { setFieldValue, setFieldTouched } = useFormikContext();
 
   return (
     <Center>
@@ -40,8 +40,7 @@ function ModalCategories({
                     <TouchableOpacity
                       key={index}
                       onPress={() => {
-                        values.category = category
-                        setValues({ ...values, category: category })
+                        setFieldValue("category", category);
                         setFieldTouched("category", true);
                         setShowModal(false);
                       }}
