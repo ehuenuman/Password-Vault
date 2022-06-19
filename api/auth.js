@@ -1,9 +1,8 @@
 import { signInAnonymously, createUserWithEmailAndPassword, signOut, updateProfile, signInWithEmailAndPassword, getAuth } from "firebase/auth";
-import * as Crypto from 'expo-crypto';
 import * as SecureStore from 'expo-secure-store';
 
 import { auth } from "./firebaseConfig";
-import { createUserDatabase } from "./user";
+import { createUserDatabase, loadUserKeys } from "./user";
 
 /**
  * Asynchronously signs in using an email and password.
@@ -21,17 +20,19 @@ export async function signInUser(userData) {
   }
   return signInWithEmailAndPassword(auth, userData.email, userData.masterPassword)
     .then(async userCredential => {
+      loadUserKeys(userCredential.user.uid);
       return userCredential.user.getIdToken()
         .then(async token => {
           response.isValid = true;
           response.message = token;
 
-          await SecureStore.setItemAsync("cypher", userData.masterPassword);
+          // Store the master password in the keychain
+          await SecureStore.setItemAsync("KEY_PHRASE", userData.masterPassword);
 
           return response
         })
         .catch(error => {
-          console.warn(error);
+          console.error(error);
 
           return response;
         });
@@ -79,15 +80,23 @@ export async function signUpUser(newUserData) {
     })
     .catch(error => console.error(error.code + " | " + error.message));
 
+  // Save the master password in the keychain
+  await SecureStore.setItemAsync("KEY_PHRASE", newUserData.masterPassword);
+
   return userToken;
 }
 
 /**
- * Delete the auth user instance. 
+ * Delete the auth user instance and clean the keychain. 
  */
 export function signOutUser() {
   signOut(auth)
-    .then(() => console.log("Sign out successful"))
+    .then(async () => {
+      await SecureStore.deleteItemAsync("KEY_PHRASE");
+      await SecureStore.deleteItemAsync("SALT");
+      await SecureStore.deleteItemAsync("IV");
+      // console.log("Sign out successful");
+    })
     .catch(error => console.error(error));
 }
 
@@ -109,32 +118,32 @@ export async function anonymousUser() {
   return userToken
 }
 
-/**
- * Verify the password matches with the hash. 
- * 
- * @param {string} password Characters that will be compared.
- * @param {string} hash Hash string that will be compared.
- * @returns Return a `bolean` indicating if the password is correct.
- */
-async function isCorrectPassword(password, hash) {
-  const tempHash = await sha512(password);
-  return (tempHash === hash)
-}
+// /**
+//  * Verify the password matches with the hash. 
+//  * 
+//  * @param {string} password Characters that will be compared.
+//  * @param {string} hash Hash string that will be compared.
+//  * @returns Return a `bolean` indicating if the password is correct.
+//  */
+// async function isCorrectPassword(password, hash) {
+//   const tempHash = await sha512(password);
+//   return (tempHash === hash)
+// }
 
-/**
- * Calculate the hash of a string using **sha512 algorithm**.
- * 
- * @param {string} text String to hashing
- * @returns sha512 digest
- */
-async function sha512(text) {
-  var digest = "";
-  await Crypto.digestStringAsync(
-    Crypto.CryptoDigestAlgorithm.SHA512,
-    text
-  )
-    .then(hash => digest = hash)
-    .catch(err => console.warn(err));
+// /**
+//  * Calculate the hash of a string using **sha512 algorithm**.
+//  * 
+//  * @param {string} text String to hashing
+//  * @returns sha512 digest
+//  */
+// async function sha512(text) {
+//   var digest = "";
+//   await Crypto.digestStringAsync(
+//     Crypto.CryptoDigestAlgorithm.SHA512,
+//     text
+//   )
+//     .then(hash => digest = hash)
+//     .catch(err => console.warn(err));
 
-  return digest
-}
+//   return digest
+// }

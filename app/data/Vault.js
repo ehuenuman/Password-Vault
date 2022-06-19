@@ -1,11 +1,13 @@
 import { Timestamp } from "firebase/firestore";
+import * as SecureStore from "expo-secure-store";
+import CryptoES from "crypto-es";
 
 import { auth } from "../../api/firebaseConfig";
 import { deletePasswordRegister, getAllEncryptedData, updatePasswordRegister, writePasswordRegister } from "../../api/userPasswordData";
 
 class Vault {
   #cryptedVault;
-  #decryptedVault;
+  #decryptedVault = [];
   #USER_ID = "";
 
   /**
@@ -14,18 +16,27 @@ class Vault {
    * @returns True|False - Final state of the fetching.
    */
   async init() {
+    // Should be return the user token?
     let success = false;
     this.#USER_ID = auth.currentUser.uid;
     await getAllEncryptedData(this.#USER_ID)
       .then(
-        data => {
-          this.#cryptedVault = data;
-          this.#decryptedVault = data;
-          success = !success;
+        async data => {
+          // Get user's keys from keychain
+          const KEY_PHRASE = await SecureStore.getItemAsync("KEY_PHRASE");
+          const SALT = await SecureStore.getItemAsync("SALT")
+          const IV = await SecureStore.getItemAsync("IV")
+          // Calculate the KEY
+          const KEY = CryptoES.PBKDF2(KEY_PHRASE, SALT, { keySize: 512 / 32 });
+          // Decrypt every password and put it in the vault
+          data.forEach(element => {
+            const decryptedRegister = CryptoES.AES.decrypt(element.ct, KEY, { iv: CryptoES.enc.Hex.parse(IV) });
+            this.#decryptedVault.push({ ...JSON.parse(decryptedRegister.toString(CryptoES.enc.Utf8)), id: element.id });
+          });
+          success = true;
         })
       .catch(error => console.error(error));
-
-    return success
+    return success;
   }
 
   /**
@@ -48,7 +59,7 @@ class Vault {
   registerById(id) {
     // console.log(this.#USER_ID);
     const register = this.#decryptedVault.filter(object => object.id == id);
-    return register[0]
+    return register[0];
   }
 
   /**
@@ -68,17 +79,24 @@ class Vault {
       updateTimestamp: Timestamp.now(),
     }
 
-    await writePasswordRegister(this.#USER_ID, tempRegister)
+    // Get the keys from the keychain
+    const KEY_PHRASE = await SecureStore.getItemAsync("KEY_PHRASE");
+    const SALT = await SecureStore.getItemAsync("SALT");
+    const IV = await SecureStore.getItemAsync("IV");
+    // Encrypt
+    const key = CryptoES.PBKDF2(KEY_PHRASE, SALT, { keySize: 512 / 32 });
+    const encryptedRegister = CryptoES.AES.encrypt(JSON.stringify(tempRegister), key, { iv: CryptoES.enc.Hex.parse(IV) });
+
+    await writePasswordRegister(auth.currentUser.uid, encryptedRegister.toString())
       .then(registerId => {
         if (registerId) {
           tempRegister.id = registerId;
           this.#decryptedVault.push(tempRegister);
           registerSaved = true;
         }
-      })
-      .catch(error => console.error(error));
+      });
 
-    return registerSaved
+    return registerSaved;
   }
 
   /**
@@ -95,7 +113,16 @@ class Vault {
       ...data,
       updateTimestamp: Timestamp.now()
     }
-    await updatePasswordRegister(this.#USER_ID, id, updatedRegister)
+
+    // Get the keys from the keychain
+    const KEY_PHRASE = await SecureStore.getItemAsync("KEY_PHRASE");
+    const SALT = await SecureStore.getItemAsync("SALT");
+    const IV = await SecureStore.getItemAsync("IV");
+    // Encrypt
+    const key = CryptoES.PBKDF2(KEY_PHRASE, SALT, { keySize: 512 / 32 });
+    const encryptedRegister = CryptoES.AES.encrypt(JSON.stringify(updatedRegister), key, { iv: CryptoES.enc.Hex.parse(IV) });
+
+    await updatePasswordRegister(this.#USER_ID, id, encryptedRegister.toString())
       .then(response => {
         if (response)
           this.#decryptedVault = this.#decryptedVault.filter(object => {
