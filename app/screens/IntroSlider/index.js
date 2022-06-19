@@ -21,14 +21,14 @@ function Welcome({ router, navigation }) {
             <Button
               width="100px"
               _text={{ textTransform: "uppercase" }}
-              onPress={() => navigation.navigate("FirstLogin")}
+              onPress={() => navigation.navigate("FirstLogin", {})}
             >
               Log in
             </Button>
             <Button
               colorScheme="secondary"
               width="100"
-              onPress={() => navigation.navigate("CreateAccount")}
+              onPress={() => navigation.navigate("CreateAccount", {})}
               _text={{ textAlign: "center" }}
             >
               Get Started

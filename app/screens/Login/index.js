@@ -8,7 +8,7 @@ import { isEmailAvailable } from '../../../api/user';
 import { AuthContext } from '../../data/AuthContext';
 
 function Login({ route, navigation }) {
-  const { email } = route.params;
+  const { email = "" } = route.params;
 
   const [coulBeNewUser, setCouldBeNewUser] = useState(false);
   const [isFailLogin, setIsFailLogin] = useState(false);

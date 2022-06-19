@@ -150,7 +150,7 @@ export default function App() {
                   <Stack.Group>
                     <Stack.Screen name="Welcome" component={Welcome} options={{ headerShown: false }} />
                     <Stack.Screen name="CreateAccount" component={CreateAccount} />
-                    <Stack.Screen name="FirstLogin" component={Login} initialParams={{ email: "" }} />
+                    <Stack.Screen name="FirstLogin" component={Login} />
                   </Stack.Group>
                 </Stack.Navigator>
               ) : (
