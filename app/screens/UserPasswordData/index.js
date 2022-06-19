@@ -23,6 +23,7 @@ import ModalCategories from './components/ModalCategories';
 function UserPasswordData({ route, navigation }) {
 
   const { passwordId = null, action } = route.params;
+  const [registerId, setRegisterId] = useState(passwordId);
   const [formMode, setFormMode] = useState(action);
   const [modalCategoriesIsOpen, setModalCategoriesIsOpen] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -77,7 +78,7 @@ function UserPasswordData({ route, navigation }) {
     });
   };
 
-  var register = (passwordId === null) ? null : vault.registerById(passwordId);
+  var register = (registerId === null) ? null : vault.registerById(registerId);
   var formInitialValues = {
     logo: register?.logo ?? "",
     accountName: register?.accountName ?? "",
@@ -99,7 +100,7 @@ function UserPasswordData({ route, navigation }) {
   const submitForm = async values => {
     if (formMode == "edit") {
       // TO DO: Actions to edit a register
-      await vault.updateRegister(passwordId, values)
+      await vault.updateRegister(registerId, values)
         .then(sucess => {
           if (sucess) {
             setFormMode("view");
@@ -111,8 +112,9 @@ function UserPasswordData({ route, navigation }) {
         });
     } else {
       await vault.newRegister(values)
-        .then(success => {
-          if (success) {
+        .then(id => {
+          if (id) {
+            setRegisterId(id);
             setFormMode("view");
             setHasUnsavedChanges(false);
             toast.show({
@@ -135,9 +137,10 @@ function UserPasswordData({ route, navigation }) {
           style: 'destructive',
           onPress: () => {
             setIsDeletingPassword(true);
-            vault.deleteRegister(passwordId)
+            vault.deleteRegister(registerId)
               .then(response => {
                 if (response) {
+                  toast.closeAll();
                   toast.show({ description: "Password Deleted", duration: 2000 });
                   navigation.goBack();
                 }

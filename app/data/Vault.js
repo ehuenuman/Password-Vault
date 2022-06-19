@@ -66,11 +66,11 @@ class Vault {
    * Call the API to save the new register in Firestore and update the Decrypted Vault.
    * 
    * @param {object} data Data to be add into the database.
-   * @returns A `boolean` indicates the success of the creation process.
+   * @returns The ID of the new register.
    */
   async newRegister(data) {
     // console.log(this.#USER_ID);
-    let registerSaved = false;
+    let newRegisterId = "";
     let tempRegister = {
       ...data,
       dataType: "password",
@@ -92,11 +92,11 @@ class Vault {
         if (registerId) {
           tempRegister.id = registerId;
           this.#decryptedVault.push(tempRegister);
-          registerSaved = true;
+          newRegisterId = registerId;
         }
       });
 
-    return registerSaved;
+    return newRegisterId;
   }
 
   /**
