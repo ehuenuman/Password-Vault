@@ -60,6 +60,7 @@ function UserPasswordData({ route, navigation }) {
           );
         } else {
           (formMode === "edit") && setFormMode("view");
+          (formMode === "new") && navigation.dispatch(action);
         }
       } else {
         return;
