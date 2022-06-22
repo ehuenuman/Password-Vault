@@ -11,7 +11,7 @@ import { createUserDatabase, loadUserKeys } from "./user";
  * Fails with an error if the email address and password do not match.
  * 
  * @param {object} userData `Object` that contain the user/email and the password typed by the user.
- * @return `Object` with the validity status and a message. If `isValid` is `true` then `message` is the user's ID that will be used as `userToken`.
+ * @return `Object` with the validity status and a message. If `isValid` is `true` then `message` is the user's token.
  */
 export async function signInUser(userData) {
   var response = {
