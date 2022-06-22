@@ -100,16 +100,24 @@ function UserPasswordData({ route, navigation }) {
   const submitForm = async values => {
     if (formMode == "edit") {
       // TO DO: Actions to edit a register
-      await vault.updateRegister(registerId, values)
-        .then(sucess => {
-          if (sucess) {
-            setFormMode("view");
-            setHasUnsavedChanges(false);
-            toast.show({
-              description: "Password Updated"
-            });
-          } // TO DO: Message that indicates the error to the user.
+      if (hasUnsavedChanges) {
+        await vault.updateRegister(registerId, values)
+          .then(sucess => {
+            if (sucess) {
+              setFormMode("view");
+              setHasUnsavedChanges(false);
+              toast.show({
+                description: "Password Updated"
+              });
+            } // TO DO: Message that indicates the error to the user.
+          })
+      } else {
+        setFormMode("view");
+        setHasUnsavedChanges(false);
+        toast.show({
+          description: "Password Updated"
         });
+      }
     } else {
       await vault.createRegister(values)
         .then(id => {
