@@ -111,7 +111,7 @@ function UserPasswordData({ route, navigation }) {
           } // TO DO: Message that indicates the error to the user.
         });
     } else {
-      await vault.newRegister(values)
+      await vault.createRegister(values)
         .then(id => {
           if (id) {
             setRegisterId(id);
