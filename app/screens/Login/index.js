@@ -4,7 +4,6 @@ import { object, string } from 'yup';
 import { Alert, Button, FormControl, HStack, Icon, IconButton, Image, Input, ScrollView, Text, VStack } from 'native-base';
 import { FontAwesome } from '@expo/vector-icons';
 
-import { isEmailAvailable } from '../../../api/user';
 import { AuthContext } from '../../data/AuthContext';
 
 function Login({ route, navigation }) {
@@ -17,20 +16,19 @@ function Login({ route, navigation }) {
 
   const { signIn } = useContext(AuthContext);
 
-  const submitForm = (values, formikBag) => {
+  const submitForm = async values => {
     setCouldBeNewUser(false);
     setIsFailLogin(false);
 
-    signIn(values)
+    await signIn(values)
       .then(response => {
+        setLoginMessage(response);
         if (response !== "OK") {
-          setLoginMessage(response);
           setIsFailLogin(true);
           (response == "Email does not have account") && setCouldBeNewUser(true);
         }
       })
-      .catch(e => console.error(e))
-      .finally(() => formikBag.setSubmitting(false));
+      .catch(e => console.error(e));
   }
 
   let formSchema = object({
@@ -45,7 +43,7 @@ function Login({ route, navigation }) {
         masterPassword: ""
       }}
       validationSchema={formSchema}
-      onSubmit={(values, formikBag) => submitForm(values, formikBag)}
+      onSubmit={async values => submitForm(values, formikBag)}
     >
       {({ handleSubmit, handleBlur, handleChange, values, touched, errors, isSubmitting, setFieldValue, setFieldTouched, setFieldError }) => (
         <ScrollView
