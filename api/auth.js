@@ -1,4 +1,4 @@
-import { signInAnonymously, createUserWithEmailAndPassword, signOut, updateProfile, signInWithEmailAndPassword, getAuth } from "firebase/auth";
+import { signInAnonymously, createUserWithEmailAndPassword, signOut, updateProfile, signInWithEmailAndPassword } from "firebase/auth";
 import * as SecureStore from 'expo-secure-store';
 
 import { auth } from "./firebaseConfig";
@@ -12,6 +12,10 @@ import { createUserDatabase, loadUserKeys } from "./user";
  * 
  * @param {object} userData `Object` that contain the user/email and the password typed by the user.
  * @return `Object` with the validity status and a message. If `isValid` is `true` then `message` is the user's token.
+ * 
+ * List of Auth errors: 
+ * - https://firebase.google.com/docs/auth/admin/errors
+ * - https://firebase.google.com/docs/reference/js/v8/firebase.auth.Error 
  */
 export async function signInUser(userData) {
   var response = {
@@ -38,10 +42,10 @@ export async function signInUser(userData) {
         });
     })
     .catch(error => {
-      // List of Auth errors: https://firebase.google.com/docs/auth/admin/errors
+      // console.warn(error);
       switch (error.code) {
-        case "auth/too-many-request":
-          response.message = "Account has been temporarily disabled due to many failed login attempts";
+        case "auth/too-many-requests":
+          response.message = "Account has been temporarily disabled due to many failed login attempts. Try again later.";
           break;
         case "auth/wrong-password":
           response["message"] = "Wrong password";

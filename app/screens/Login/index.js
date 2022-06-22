@@ -43,7 +43,7 @@ function Login({ route, navigation }) {
         masterPassword: ""
       }}
       validationSchema={formSchema}
-      onSubmit={async values => submitForm(values, formikBag)}
+      onSubmit={async values => submitForm(values)}
     >
       {({ handleSubmit, handleBlur, handleChange, values, touched, errors, isSubmitting, setFieldValue, setFieldTouched, setFieldError }) => (
         <ScrollView
@@ -115,7 +115,7 @@ function Login({ route, navigation }) {
                 {
                   isFailLogin &&
                   <Alert status="error" width="100%">
-                    <Text>{loginMessage}</Text>
+                    <Text textAlign="center">{loginMessage}</Text>
                   </Alert>
                 }
               </VStack>
