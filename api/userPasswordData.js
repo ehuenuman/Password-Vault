@@ -12,7 +12,7 @@ import { firestore } from "./firebaseConfig";
 export async function writePasswordRegister(userId, data) {
   let registerId = "";
   const ref = doc(collection(firestore, "users", userId, "passwords"));
-  registerId = await setDoc(ref, { ct: data })
+  registerId = await setDoc(ref, data)
     .then(() => ref.id)
     .catch(error => console.error(error));
 
@@ -29,7 +29,7 @@ export async function writePasswordRegister(userId, data) {
  */
 export async function updatePasswordRegister(userId, passwordId, data) {
   const userDocumentRef = doc(firestore, "users", userId);
-  return updateDoc(doc(userDocumentRef, "passwords", passwordId), { ct: data })
+  return updateDoc(doc(userDocumentRef, "passwords", passwordId), data)
     .then(() => true)
     .catch(error => {
       console.error(error);
