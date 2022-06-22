@@ -31,7 +31,7 @@ export async function signInUser(userData) {
           response.message = token;
 
           // Store the master password in the keychain
-          await SecureStore.setItemAsync("KEY_PHRASE", userData.masterPassword);
+          await SecureStore.setItemAsync("PASSPHRASE", userData.masterPassword);
 
           return response
         })
@@ -85,7 +85,7 @@ export async function signUpUser(newUserData) {
     .catch(error => console.error(error.code + " | " + error.message));
 
   // Save the master password in the keychain
-  await SecureStore.setItemAsync("KEY_PHRASE", newUserData.masterPassword);
+  await SecureStore.setItemAsync("PASSPHRASE", newUserData.masterPassword);
 
   return userToken;
 }
@@ -96,7 +96,7 @@ export async function signUpUser(newUserData) {
 export function signOutUser() {
   signOut(auth)
     .then(async () => {
-      await SecureStore.deleteItemAsync("KEY_PHRASE");
+      await SecureStore.deleteItemAsync("PASSPHRASE");
       await SecureStore.deleteItemAsync("SALT");
       await SecureStore.deleteItemAsync("IV");
       // console.log("Sign out successful");
