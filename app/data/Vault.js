@@ -17,6 +17,7 @@ class Vault {
    */
   async init() {
     // Should be return the user token?
+    this.#decryptedVault = [];
     let success = false;
     this.#USER_ID = auth.currentUser.uid;
     await getAllEncryptedData(this.#USER_ID)
@@ -47,7 +48,7 @@ class Vault {
   allDecryptedData() {
 
     let decryptedData = this.#decryptedVault;
-    return decryptedData
+    return decryptedData;
   }
 
   /**
