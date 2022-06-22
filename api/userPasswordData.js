@@ -61,7 +61,8 @@ export async function deletePasswordRegister(userId, id) {
  */
 export async function getAllEncryptedData(userId) {
   const passwordsCollection = collection(firestore, "users", userId, "passwords");
-  const querySnapshot = await getDocs(passwordsCollection);
+  const q = query(passwordsCollection, orderBy("accountProvider"));
+  const querySnapshot = await getDocs(q);
   var passwords = [];
 
   if (querySnapshot.size > 0) {
