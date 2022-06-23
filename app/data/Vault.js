@@ -8,12 +8,10 @@ import { deletePasswordRegister, getAllEncryptedData, updatePasswordRegister, wr
 class Vault {
   #cryptedVault;
   #decryptedVault;
-  #user_id;
 
   constructor() {
     this.#cryptedVault = [];
     this.#decryptedVault = [];
-    this.#user_id = "";
   }
 
   /**
@@ -25,8 +23,7 @@ class Vault {
     // Should be return the user token?
     this.#decryptedVault = [];
     let success = false;
-    this.#user_id = auth.currentUser.uid;
-    await getAllEncryptedData(this.#user_id)
+    await getAllEncryptedData(auth.currentUser.uid)
       .then(
         async data => {
           // Get user's keys from keychain
@@ -65,7 +62,6 @@ class Vault {
    * @returns Object
    */
   registerById(id) {
-    // console.log(this.#USER_ID);
     const register = this.#decryptedVault.filter(object => object.id == id);
     return register[0];
   }
@@ -158,7 +154,7 @@ class Vault {
     delete encryptedRegister.user;
     delete encryptedRegister.password;
 
-    await updatePasswordRegister(this.#user_id, id, encryptedRegister)
+    await updatePasswordRegister(auth.currentUser.uid, id, encryptedRegister)
       .then(response => {
         if (response)
           this.#decryptedVault = this.#decryptedVault.map(element => {
@@ -185,10 +181,10 @@ class Vault {
    * @return A `boolean` indicates the success of the deleting process.
    */
   async deleteRegister(id) {
-    return deletePasswordRegister(this.user_id, id)
+    return deletePasswordRegister(auth.currentUser.uid, id)
       .then(response => {
         if (response)
-          this.#decryptedVault = this.#decryptedVault.filter(object => object.id !== id);
+          this.#decryptedVault = this.#decryptedVault.filter(element => element.id !== id);
         return response;
       });
   }
