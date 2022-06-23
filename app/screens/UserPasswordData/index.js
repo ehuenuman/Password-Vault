@@ -90,11 +90,11 @@ function UserPasswordData({ route, navigation }) {
   }
 
   let formSchema = object({
-    accountName: string().required("Required field"),
-    website: string().required("Required field"),
-    user: string().required("Required field"),
-    password: string().required("Required field"),
-    category: string().required("Required field")
+    accountName: string().required("Required"),
+    website: string().required("Required"),
+    user: string().required("Required"),
+    password: string().required("Required"),
+    category: string().required("Required")
   });
 
   const submitForm = async values => {
@@ -239,7 +239,7 @@ function UserPasswordData({ route, navigation }) {
                   label="Category"
                   value={values.category}
                   isViewMode={formMode == "view" ? true : false}
-                  isDisabled={true}
+                  isDisabled
                   hasChanged={setHasUnsavedChanges}
                   leftElement={(formMode == "view" ? false : true) &&
                     <Button
