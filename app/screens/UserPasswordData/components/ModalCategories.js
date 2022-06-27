@@ -5,12 +5,37 @@ import { TouchableOpacity } from 'react-native';
 import { useFormikContext } from 'formik';
 
 const categories = [
+  "Art and Design",
+  "Auto and Vehicles",
+  "Beauty",
+  "Books and Reference",
+  "Business",
+  "Comics",
+  "Communications",
+  "Dating",
+  "Education",
+  "Entertainment",
+  "Events",
+  "Finance",
+  "Food and Drink",
+  "Health and Fitness",
+  "House and Home",
+  "Libraries and Demos",
+  "Lifestyle",
+  "Maps and Navigation",
+  "Music and Audio",
+  "News and Magazines",
+  "Parenting",
+  "Personalisation",
+  "Photography",
+  "Productivity",
+  "Shopping",
   "Social",
-  "News",
-  "Games",
-  "Finances",
-  "Store",
-  "Blogs"
+  "Sports",
+  "Tools",
+  "Travel and Local",
+  "Video Players and Editors",
+  "Weather"
 ];
 
 function ModalCategories({
