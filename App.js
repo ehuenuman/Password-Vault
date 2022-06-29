@@ -68,17 +68,17 @@ export default function App() {
 
   onAuthStateChanged(auth, async (user) => {
     if (user) {
-      console.log(user.displayName, "logged");
+      // console.log(user.displayName, "logged");
       if (userToken === null) {
         // TO DO: Re-auth
-        console.log("Re-Auth");
+        // console.log("Re-Auth");
         await user.getIdToken()
           .then(userToken => setUserToken(userToken))
           .catch(error => console.error(error));
         setAppIsReady(true);
       }
     } else {
-      console.log("User signed out");
+      // console.log("User signed out");
       setUserToken(null);
       setAppIsReady(true);
     }
