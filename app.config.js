@@ -22,6 +22,6 @@ export default {
       foregroundImage: "app/assets/icon_bg_transparent.png",
       backgroundColor: "#00263F"
     },
-    package: process.env.PACKAGE || "com.ehuenuman.passwordvault"
+    package: process.env.APP_VARIANT ? "com.ehuenuman.passwordvault." + APP_VARIANT : "com.ehuenuman.passwordvault"
   }
 }
