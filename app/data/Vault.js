@@ -7,8 +7,12 @@ import { deletePasswordRegister, getAllEncryptedData, updatePasswordRegister, wr
 
 class Vault {
   #cryptedVault;
-  #decryptedVault = [];
-  #USER_ID = "";
+  #decryptedVault;
+
+  constructor() {
+    this.#cryptedVault = [];
+    this.#decryptedVault = [];
+  }
 
   /**
    * Initialise the Vault fetching all the encrypted data from the database.
@@ -17,21 +21,22 @@ class Vault {
    */
   async init() {
     // Should be return the user token?
+    this.#decryptedVault = [];
     let success = false;
-    this.#USER_ID = auth.currentUser.uid;
-    await getAllEncryptedData(this.#USER_ID)
+    await getAllEncryptedData(auth.currentUser.uid)
       .then(
         async data => {
           // Get user's keys from keychain
-          const KEY_PHRASE = await SecureStore.getItemAsync("KEY_PHRASE");
+          const PASSPHRASE = await SecureStore.getItemAsync("PASSPHRASE");
           const SALT = await SecureStore.getItemAsync("SALT")
           const IV = await SecureStore.getItemAsync("IV")
           // Calculate the KEY
-          const KEY = CryptoES.PBKDF2(KEY_PHRASE, SALT, { keySize: 512 / 32 });
+          const KEY = CryptoES.PBKDF2(PASSPHRASE, SALT, { keySize: 512 / 32, iterations: 5000 });
           // Decrypt every password and put it in the vault
           data.forEach(element => {
             const decryptedRegister = CryptoES.AES.decrypt(element.ct, KEY, { iv: CryptoES.enc.Hex.parse(IV) });
-            this.#decryptedVault.push({ ...JSON.parse(decryptedRegister.toString(CryptoES.enc.Utf8)), id: element.id });
+            delete element.ct;
+            this.#decryptedVault.push({ ...JSON.parse(decryptedRegister.toString(CryptoES.enc.Utf8)), ...element });
           });
           success = true;
         })
@@ -47,7 +52,7 @@ class Vault {
   allDecryptedData() {
 
     let decryptedData = this.#decryptedVault;
-    return decryptedData
+    return decryptedData;
   }
 
   /**
@@ -57,7 +62,6 @@ class Vault {
    * @returns Object
    */
   registerById(id) {
-    // console.log(this.#USER_ID);
     const register = this.#decryptedVault.filter(object => object.id == id);
     return register[0];
   }
@@ -66,37 +70,51 @@ class Vault {
    * Call the API to save the new register in Firestore and update the Decrypted Vault.
    * 
    * @param {object} data Data to be add into the database.
-   * @returns A `boolean` indicates the success of the creation process.
+   * @returns The ID of the new register.
    */
-  async newRegister(data) {
-    // console.log(this.#USER_ID);
-    let registerSaved = false;
-    let tempRegister = {
-      ...data,
+  async createRegister(data) {
+    let newRegisterId = "";
+    let metaData = {
       dataType: "password",
       accountProvider: data.accountName,
       createTimestamp: Timestamp.now(),
       updateTimestamp: Timestamp.now(),
     }
+    let decryptedRegister = {
+      ...data,
+      ...metaData,
+    }
+    let ct = {
+      user: data.user,
+      password: data.password,
+    }
 
     // Get the keys from the keychain
-    const KEY_PHRASE = await SecureStore.getItemAsync("KEY_PHRASE");
+    const PASSPHRASE = await SecureStore.getItemAsync("PASSPHRASE");
     const SALT = await SecureStore.getItemAsync("SALT");
     const IV = await SecureStore.getItemAsync("IV");
     // Encrypt
-    const key = CryptoES.PBKDF2(KEY_PHRASE, SALT, { keySize: 512 / 32 });
-    const encryptedRegister = CryptoES.AES.encrypt(JSON.stringify(tempRegister), key, { iv: CryptoES.enc.Hex.parse(IV) });
+    const KEY = CryptoES.PBKDF2(PASSPHRASE, SALT, { keySize: 512 / 32, iterations: 5000 });
+    const encryptedPassword = CryptoES.AES.encrypt(JSON.stringify(ct), KEY, { iv: CryptoES.enc.Hex.parse(IV) });
 
-    await writePasswordRegister(auth.currentUser.uid, encryptedRegister.toString())
+    let encryptedRegister = {
+      ...data,
+      ...metaData,
+      ct: encryptedPassword.toString(),
+    }
+    delete encryptedRegister.user;
+    delete encryptedRegister.password;
+
+    await writePasswordRegister(auth.currentUser.uid, encryptedRegister)
       .then(registerId => {
         if (registerId) {
-          tempRegister.id = registerId;
-          this.#decryptedVault.push(tempRegister);
-          registerSaved = true;
+          decryptedRegister.id = registerId;
+          this.#decryptedVault.push(decryptedRegister);
+          newRegisterId = registerId;
         }
       });
 
-    return registerSaved;
+    return newRegisterId;
   }
 
   /**
@@ -108,34 +126,50 @@ class Vault {
    */
   async updateRegister(id, data) {
     let registerUpdated = false;
-    delete data.id;
-    let updatedRegister = {
-      ...data,
+    let metaData = {
       updateTimestamp: Timestamp.now()
+    }
+    let decryptedRegister = {
+      ...data,
+      ...metaData,
+    }
+    let ct = {
+      user: data.user,
+      password: data.password,
     }
 
     // Get the keys from the keychain
-    const KEY_PHRASE = await SecureStore.getItemAsync("KEY_PHRASE");
+    const PASSPHRASE = await SecureStore.getItemAsync("PASSPHRASE");
     const SALT = await SecureStore.getItemAsync("SALT");
     const IV = await SecureStore.getItemAsync("IV");
     // Encrypt
-    const key = CryptoES.PBKDF2(KEY_PHRASE, SALT, { keySize: 512 / 32 });
-    const encryptedRegister = CryptoES.AES.encrypt(JSON.stringify(updatedRegister), key, { iv: CryptoES.enc.Hex.parse(IV) });
+    const KEY = CryptoES.PBKDF2(PASSPHRASE, SALT, { keySize: 512 / 32, iterations: 5000 });
+    const encryptedPassword = CryptoES.AES.encrypt(JSON.stringify(ct), KEY, { iv: CryptoES.enc.Hex.parse(IV) });
 
-    await updatePasswordRegister(this.#USER_ID, id, encryptedRegister.toString())
+    let encryptedRegister = {
+      ...data,
+      ...metaData,
+      ct: encryptedPassword.toString(),
+    }
+    delete encryptedRegister.user;
+    delete encryptedRegister.password;
+
+    await updatePasswordRegister(auth.currentUser.uid, id, encryptedRegister)
       .then(response => {
         if (response)
-          this.#decryptedVault = this.#decryptedVault.filter(object => {
-            if (object.id === id) {
-              object = {
-                ...updatedRegister,
-                id: id
-              }
+          this.#decryptedVault = this.#decryptedVault.map(element => {
+            // console.log(element);
+            if (element.id === id) {
+              let temp = { ...element, ...decryptedRegister }
+              // console.log(temp);
+              return temp;
             }
-            return object;
+            return element
           });
         registerUpdated = response;
       });
+
+    // console.log(this.#decryptedVault);
 
     return registerUpdated;
   }
@@ -147,10 +181,10 @@ class Vault {
    * @return A `boolean` indicates the success of the deleting process.
    */
   async deleteRegister(id) {
-    return deletePasswordRegister(this.#USER_ID, id)
+    return deletePasswordRegister(auth.currentUser.uid, id)
       .then(response => {
         if (response)
-          this.#decryptedVault = this.#decryptedVault.filter(object => object.id !== id);
+          this.#decryptedVault = this.#decryptedVault.filter(element => element.id !== id);
         return response;
       });
   }

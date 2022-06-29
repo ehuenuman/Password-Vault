@@ -17,7 +17,7 @@ import PasswordInputField from "../UserPasswordData/components/PasswordInputFiel
 
 function CreateAccount({ route, navigation }) {
 
-  const { email } = route.params;
+  const { email = "" } = route.params;
 
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
@@ -47,22 +47,22 @@ function CreateAccount({ route, navigation }) {
   ), [hasUnsavedChanges, navigation]);
 
   let formSchema = object({
-    userName: string().required("Required field"),
+    userName: string().required("Required"),
     email: string()
       .email("Write a valid email")
-      .required("Required field")
+      .required("Required")
       .test(
         "EmailAvailability",
         "Email is already used",
         async value => await isEmailAvailable(value).then(isAvailable => isAvailable)
       ),
     masterPassword: string()
-      .matches(/[0-9]+/, "Must have at least one digit.")
-      .matches(/[a-z]+/, "Must have at least one lower case.")
-      .matches(/[A-Z]+/, "Must have at least one upper case.")
-      .matches(/[!"#$%&'()*+,\-.\/:;<=>?@\[\]\\^_`{|}~]+/, "Must have at least one symbol.")
+      .matches(/[0-9]+/, "Must have at least one digit")
+      .matches(/[a-z]+/, "Must have at least one lower case")
+      .matches(/[A-Z]+/, "Must have at least one upper case")
+      .matches(/[!"#$%&'()*+,\-.\/:;<=>?@\[\]\\^_`{|}~]+/, "Must have at least one symbol")
       .min(15, "Use 15 or more characters")
-      .required("Required field"),
+      .required("Required"),
     masterPassword2: string().required("Required field").oneOf([ref('masterPassword'), null], "Passwords must match")
   });
 

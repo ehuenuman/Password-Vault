@@ -21,34 +21,7 @@ import SelectAccountProviders from './app/screens/UserPasswordData/components/Se
 export default function App() {
 
   const [appIsReady, setAppIsReady] = useState(false);
-
-  const [state, dispatch] = useReducer(
-    (prevState, action) => {
-      switch (action.type) {
-        case "RESTORE_TOKEN":
-          return {
-            ...prevState,
-            userToken: action.token,
-          };
-        case "SIGN_IN":
-          return {
-            ...prevState,
-            isSignout: false,
-            userToken: action.token,
-          };
-        case "SIGN_OUT":
-          return {
-            ...prevState,
-            isSignout: true,
-            userToken: null,
-          };
-      }
-    },
-    {
-      isSignout: false,
-      userToken: null,
-    }
-  );
+  const [userToken, setUserToken] = useState(null);
 
   useEffect(() => {
     const prepare = async () => {
@@ -69,12 +42,10 @@ export default function App() {
         await signInUser(data)
           .then(response => {
             if (response.isValid) {
-              vault.init().then(successful => {
-                successful && dispatch({ type: "SIGN_IN", token: response.message });
-              })
-                .catch(error => console.error(error));
+              setUserToken(response.message);
+              setAppIsReady(true);
             } else {
-              message = loginObject.message;
+              message = response.message;
             }
           })
           .catch(e => console.error(e));
@@ -83,11 +54,11 @@ export default function App() {
       },
       signOut: async () => {
         signOutUser();
-        dispatch({ type: "SIGN_OUT" });
+        setUserToken(null);
       },
       signUp: async (data) => {
         signUpUser(data)
-          .then(userToken => dispatch({ type: "SIGN_IN", token: userToken }))
+          .then(userToken => setUserToken(userToken))
           .catch(e => console.error(e));
       },
       loggedUser: () => auth.currentUser
@@ -95,25 +66,20 @@ export default function App() {
     []
   );
 
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     if (user) {
       // console.log(user.displayName, "logged");
-      if (state.userToken === null) {
-        vault.init()
-          .then(successful => {
-            if (successful) {
-              user.getIdToken()
-                .then(userToken => {
-                  dispatch({ type: "RESTORE_TOKEN", token: userToken });
-                  setAppIsReady(true);
-                })
-                .catch(error => console.error(error));
-            }
-          })
+      if (userToken === null) {
+        // TO DO: Re-auth
+        // console.log("Re-Auth");
+        await user.getIdToken()
+          .then(userToken => setUserToken(userToken))
           .catch(error => console.error(error));
+        setAppIsReady(true);
       }
     } else {
-      console.log("User signed out");
+      // console.log("User signed out");
+      setUserToken(null);
       setAppIsReady(true);
     }
   });
@@ -136,7 +102,7 @@ export default function App() {
         <Box onLayout={onLayoutRootView} flex={1}>
           <NavigationContainer>
             {
-              state.userToken === null ? (
+              userToken === null ? (
                 <Stack.Navigator
                   initialRouteName="Welcome"
                   screenOptions={{
@@ -149,8 +115,8 @@ export default function App() {
                 >
                   <Stack.Group>
                     <Stack.Screen name="Welcome" component={Welcome} options={{ headerShown: false }} />
-                    <Stack.Screen name="CreateAccount" component={CreateAccount} initialParams={{ email: "" }} />
-                    <Stack.Screen name="FirstLogin" component={Login} initialParams={{ email: "" }} />
+                    <Stack.Screen name="CreateAccount" component={CreateAccount} />
+                    <Stack.Screen name="FirstLogin" component={Login} />
                   </Stack.Group>
                 </Stack.Navigator>
               ) : (

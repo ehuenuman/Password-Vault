@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, Keyboard } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { Formik } from 'formik';
 import { object, string } from 'yup';
@@ -23,6 +23,7 @@ import ModalCategories from './components/ModalCategories';
 function UserPasswordData({ route, navigation }) {
 
   const { passwordId = null, action } = route.params;
+  const [registerId, setRegisterId] = useState(passwordId);
   const [formMode, setFormMode] = useState(action);
   const [modalCategoriesIsOpen, setModalCategoriesIsOpen] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -34,7 +35,8 @@ function UserPasswordData({ route, navigation }) {
   useEffect(() => navigation.addListener(
     'beforeRemove', e => {
       const action = e.data.action;
-      if (formMode === "new" || formMode === "edit") {
+      !isDeletingPassword && toast.closeAll();
+      if (!isDeletingPassword && (formMode === "new" || formMode === "edit")) {
         e.preventDefault();
         if (hasUnsavedChanges) {
           Alert.alert(
@@ -59,22 +61,24 @@ function UserPasswordData({ route, navigation }) {
             ]
           );
         } else {
+          (formMode === "new") && navigation.dispatch(action);
           (formMode === "edit") && setFormMode("view");
         }
       } else {
         return;
       }
     }
-  ), [hasUnsavedChanges, formMode, navigation]);
+  ), [hasUnsavedChanges, isDeletingPassword, formMode, navigation]);
 
   const copyToClipboard = async (text) => {
+    toast.closeAll();
     await Clipboard.setStringAsync(text);
     toast.show({
-      description: "User copied"
+      description: "User copied to clipboard"
     });
   };
 
-  var register = (passwordId === null) ? null : vault.registerById(passwordId);
+  var register = (registerId === null) ? null : vault.registerById(registerId);
   var formInitialValues = {
     logo: register?.logo ?? "",
     accountName: register?.accountName ?? "",
@@ -86,30 +90,39 @@ function UserPasswordData({ route, navigation }) {
   }
 
   let formSchema = object({
-    accountName: string().required("Required field"),
-    website: string().required("Required field"),
-    user: string().required("Required field"),
-    password: string().required("Required field"),
-    category: string().required("Required field")
+    accountName: string().required("Required"),
+    website: string().required("Required"),
+    user: string().required("Required"),
+    password: string().required("Required"),
+    category: string().required("Required")
   });
 
   const submitForm = async values => {
     if (formMode == "edit") {
       // TO DO: Actions to edit a register
-      await vault.updateRegister(passwordId, values)
-        .then(sucess => {
-          if (sucess) {
-            setFormMode("view");
-            setHasUnsavedChanges(false);
-            toast.show({
-              description: "Password Updated"
-            });
-          } // TO DO: Message that indicates the error to the user.
+      if (hasUnsavedChanges) {
+        await vault.updateRegister(registerId, values)
+          .then(sucess => {
+            if (sucess) {
+              setFormMode("view");
+              setHasUnsavedChanges(false);
+              toast.show({
+                description: "Password Updated"
+              });
+            } // TO DO: Message that indicates the error to the user.
+          })
+      } else {
+        setFormMode("view");
+        setHasUnsavedChanges(false);
+        toast.show({
+          description: "Password Updated"
         });
+      }
     } else {
-      await vault.newRegister(values)
-        .then(success => {
-          if (success) {
+      await vault.createRegister(values)
+        .then(id => {
+          if (id) {
+            setRegisterId(id);
             setFormMode("view");
             setHasUnsavedChanges(false);
             toast.show({
@@ -132,10 +145,11 @@ function UserPasswordData({ route, navigation }) {
           style: 'destructive',
           onPress: () => {
             setIsDeletingPassword(true);
-            vault.deleteRegister(passwordId)
+            vault.deleteRegister(registerId)
               .then(response => {
                 if (response) {
-                  toast.show({ description: "Password Deleted" });
+                  toast.closeAll();
+                  toast.show({ description: "Password Deleted", duration: 2000 });
                   navigation.goBack();
                 }
               });
@@ -225,12 +239,15 @@ function UserPasswordData({ route, navigation }) {
                   label="Category"
                   value={values.category}
                   isViewMode={formMode == "view" ? true : false}
-                  isDisabled={true}
+                  isDisabled
                   hasChanged={setHasUnsavedChanges}
                   leftElement={(formMode == "view" ? false : true) &&
                     <Button
                       variant="outline"
-                      onPress={() => setModalCategoriesIsOpen(true)}
+                      onPress={() => {
+                        Keyboard.dismiss();
+                        setModalCategoriesIsOpen(true);
+                      }}
                     >
                       {values.category ? "Change category" : "Select category"}
                     </Button>
@@ -250,7 +267,7 @@ function UserPasswordData({ route, navigation }) {
           <Box mt="10" mb="10%">
             {
               (formMode === "view") &&
-              <Button variant="outline" colorScheme="secondary" isLoading={isDeletingPassword} isLoadingText="DELETING PASSWORD" onPress={() => setFormMode("edit")} >
+              <Button variant="outline" colorScheme="secondary" onPress={() => setFormMode("edit")} >
                 Edit
               </Button>
             }

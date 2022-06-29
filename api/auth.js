@@ -1,4 +1,4 @@
-import { signInAnonymously, createUserWithEmailAndPassword, signOut, updateProfile, signInWithEmailAndPassword, getAuth } from "firebase/auth";
+import { signInAnonymously, createUserWithEmailAndPassword, signOut, updateProfile, signInWithEmailAndPassword } from "firebase/auth";
 import * as SecureStore from 'expo-secure-store';
 
 import { auth } from "./firebaseConfig";
@@ -11,7 +11,11 @@ import { createUserDatabase, loadUserKeys } from "./user";
  * Fails with an error if the email address and password do not match.
  * 
  * @param {object} userData `Object` that contain the user/email and the password typed by the user.
- * @return `Object` with the validity status and a message. If `isValid` is `true` then `message` is the user's ID that will be used as `userToken`.
+ * @return `Object` with the validity status and a message. If `isValid` is `true` then `message` is the user's token.
+ * 
+ * List of Auth errors: 
+ * - https://firebase.google.com/docs/auth/admin/errors
+ * - https://firebase.google.com/docs/reference/js/v8/firebase.auth.Error 
  */
 export async function signInUser(userData) {
   var response = {
@@ -27,7 +31,7 @@ export async function signInUser(userData) {
           response.message = token;
 
           // Store the master password in the keychain
-          await SecureStore.setItemAsync("KEY_PHRASE", userData.masterPassword);
+          await SecureStore.setItemAsync("PASSPHRASE", userData.masterPassword);
 
           return response
         })
@@ -38,10 +42,10 @@ export async function signInUser(userData) {
         });
     })
     .catch(error => {
-      // List of Auth errors: https://firebase.google.com/docs/auth/admin/errors
+      // console.warn(error);
       switch (error.code) {
-        case "auth/too-many-request":
-          response.message = "Account has been temporarily disabled due to many failed login attempts";
+        case "auth/too-many-requests":
+          response.message = "Account has been temporarily disabled due to many failed login attempts. Try again later.";
           break;
         case "auth/wrong-password":
           response["message"] = "Wrong password";
@@ -81,7 +85,7 @@ export async function signUpUser(newUserData) {
     .catch(error => console.error(error.code + " | " + error.message));
 
   // Save the master password in the keychain
-  await SecureStore.setItemAsync("KEY_PHRASE", newUserData.masterPassword);
+  await SecureStore.setItemAsync("PASSPHRASE", newUserData.masterPassword);
 
   return userToken;
 }
@@ -92,7 +96,7 @@ export async function signUpUser(newUserData) {
 export function signOutUser() {
   signOut(auth)
     .then(async () => {
-      await SecureStore.deleteItemAsync("KEY_PHRASE");
+      await SecureStore.deleteItemAsync("PASSPHRASE");
       await SecureStore.deleteItemAsync("SALT");
       await SecureStore.deleteItemAsync("IV");
       // console.log("Sign out successful");

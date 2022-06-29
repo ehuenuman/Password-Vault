@@ -4,11 +4,10 @@ import { object, string } from 'yup';
 import { Alert, Button, FormControl, HStack, Icon, IconButton, Image, Input, ScrollView, Text, VStack } from 'native-base';
 import { FontAwesome } from '@expo/vector-icons';
 
-import { isEmailAvailable } from '../../../api/user';
 import { AuthContext } from '../../data/AuthContext';
 
 function Login({ route, navigation }) {
-  const { email } = route.params;
+  const { email = "" } = route.params;
 
   const [coulBeNewUser, setCouldBeNewUser] = useState(false);
   const [isFailLogin, setIsFailLogin] = useState(false);
@@ -17,24 +16,24 @@ function Login({ route, navigation }) {
 
   const { signIn } = useContext(AuthContext);
 
-  const submitForm = (values, formikBag) => {
+  const submitForm = async values => {
     setCouldBeNewUser(false);
     setIsFailLogin(false);
 
-    signIn(values)
+    await signIn(values)
       .then(response => {
+        setLoginMessage(response);
         if (response !== "OK") {
-          setLoginMessage(response);
           setIsFailLogin(true);
+          (response == "Email does not have account") && setCouldBeNewUser(true);
         }
       })
-      .catch(e => console.error(e))
-      .finally(() => formikBag.setSubmitting(false));
+      .catch(e => console.error(e));
   }
 
   let formSchema = object({
-    email: string().required("Required field"),
-    masterPassword: string().required("Required field")
+    email: string().email("Must be a valid email").required("Required"),
+    masterPassword: string().required("Required")
   });
 
   return (
@@ -44,9 +43,9 @@ function Login({ route, navigation }) {
         masterPassword: ""
       }}
       validationSchema={formSchema}
-      onSubmit={(values, formikBag) => submitForm(values, formikBag)}
+      onSubmit={async values => submitForm(values)}
     >
-      {({ handleSubmit, handleBlur, handleChange, values, touched, errors, isSubmitting, setFieldTouched, setFieldError }) => (
+      {({ handleSubmit, handleBlur, handleChange, values, touched, errors, isSubmitting, setFieldValue, setFieldTouched, setFieldError }) => (
         <ScrollView
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{
@@ -69,17 +68,12 @@ function Login({ route, navigation }) {
                     <FormControl.ErrorMessage>{errors.email}</FormControl.ErrorMessage>
                   </HStack>
                   <Input
-                    onChangeText={handleChange("email")}
-                    onBlur={e => {
-                      setFieldTouched("email", true);
-                      values.email.length > 0
-                        && isEmailAvailable(values.email)
-                          .then(response => {
-                            response && setFieldError("email", "Email does not have registered account");
-                            response && setCouldBeNewUser(true);
-                          });
+                    onChangeText={e => {
+                      setFieldValue("email", e);
+                      setIsFailLogin(false);
+                      setCouldBeNewUser(false);
                     }}
-                    onFocus={e => setCouldBeNewUser(false)}
+                    onBlur={handleBlur("email")}
                     value={values.email}
                     rightElement={
                       coulBeNewUser
@@ -101,7 +95,10 @@ function Login({ route, navigation }) {
                   </HStack>
                   <Input
                     type={showPassword ? "text" : "password"}
-                    onChangeText={handleChange("masterPassword")}
+                    onChangeText={e => {
+                      setFieldValue("masterPassword", e);
+                      setIsFailLogin(false);
+                    }}
                     onBlur={handleBlur("masterPassword")}
                     value={values.masterPassword}
                     rightElement={
@@ -118,7 +115,7 @@ function Login({ route, navigation }) {
                 {
                   isFailLogin &&
                   <Alert status="error" width="100%">
-                    <Text>{loginMessage}</Text>
+                    <Text textAlign="center">{loginMessage}</Text>
                   </Alert>
                 }
               </VStack>
