@@ -59,7 +59,12 @@ function Login({ route, navigation }) {
           }}
         >
           <VStack space="10">
-            <Image source={require("../../assets/logo_bg_transparent.png")} alt="Security Pass - All in one place" size="xl" resizeMode="contain" alignSelf="center" />
+            <Image
+              source={require("../../assets/logo_bg_transparent.png")}
+              alt="Security Pass - All in one place"
+              size="xl"
+              resizeMode="contain"
+              alignSelf="center" />
             <VStack>
               <VStack space="5">
                 <FormControl isInvalid={isFailLogin || (touched.email && errors.email)}>
