@@ -1,3 +1,5 @@
+const app_variant = process.env.APP_VARIANT;
+
 export default {
   name: "Secure All",
   slug: "password-vault",
@@ -22,6 +24,6 @@ export default {
       foregroundImage: "app/assets/icon_bg_transparent.png",
       backgroundColor: "#00263F"
     },
-    package: process.env.APP_VARIANT ? "com.ehuenuman.passwordvault." + APP_VARIANT : "com.ehuenuman.passwordvault"
+    package: app_variant ? "com.ehuenuman.passwordvault." + app_variant : "com.ehuenuman.passwordvault"
   }
 }
