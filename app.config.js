@@ -1,10 +1,13 @@
+import 'dotenv/config';
+
 const IS_PROD = process.env.APP_VARIANT === "production"
+const IS_DEV = process.env.APP_VARIANT == "development"
 
 export default {
   name: "SecurityPass",
   slug: "password-vault",
   description: "SecurityPass is a simple mobile application that allows securely manage the passwords that we always forget.",
-  version: "1.0.0",
+  version: "0.5.0",
   orientation: "portrait",
   icon: "app/assets/icon_bg_color.png",
   splash: {
