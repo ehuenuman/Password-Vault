@@ -1,9 +1,9 @@
-const app_variant = process.env.APP_VARIANT;
+const IS_PROD = process.env.APP_VARIANT === "production"
 
 export default {
-  name: "Secure All",
+  name: "SecurityPass",
   slug: "password-vault",
-  description: "Password Vault is a simple mobile application that allows securely manage the passwords that we always forget.",
+  description: "SecurityPass is a simple mobile application that allows securely manage the passwords that we always forget.",
   version: "1.0.0",
   orientation: "portrait",
   icon: "app/assets/icon_bg_color.png",
@@ -21,9 +21,9 @@ export default {
   },
   android: {
     adaptiveIcon: {
-      foregroundImage: "app/assets/icon_bg_transparent.png",
+      foregroundImage: "app/assets/icon_launcher.png",
       backgroundColor: "#00263F"
     },
-    package: app_variant ? "com.ehuenuman.passwordvault." + app_variant : "com.ehuenuman.passwordvault"
+    package: IS_PROD ? "com.ehuenuman.passwordvault" : "com.ehuenuman.passwordvault." + process.env.APP_VARIANT
   }
 }

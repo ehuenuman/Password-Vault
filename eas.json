@@ -19,7 +19,11 @@
         "APP_VARIANT": "preview"
       }
     },
-    "production": {}
+    "production": {
+      "env": {
+        "APP_VARIANT": "production"
+      }
+    }
   },
   "submit": {
     "production": {}
