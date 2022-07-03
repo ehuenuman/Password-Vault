@@ -24,7 +24,7 @@ export default {
   },
   android: {
     adaptiveIcon: {
-      foregroundImage: "app/assets/icon_launcher.png",
+      foregroundImage: "app/assets/adaptative_icon_launcher.png",
       backgroundColor: "#00263F"
     },
     package: IS_PROD ? "com.ehuenuman.passwordvault" : "com.ehuenuman.passwordvault." + process.env.APP_VARIANT
