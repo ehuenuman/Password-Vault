@@ -1,39 +1,54 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { FormControl, Input } from 'native-base';
+import { useField, useFormikContext } from 'formik';
+import { FormControl, HStack, Input } from 'native-base';
 
 function InputField({
+  name,
   label,
-  placeHolder,
-  viewMode,
+  isViewMode = false,
+  hasChanged,
   ...props
 }) {
+  const [field, meta] = useField(name);
+  const { dirty } = useFormikContext();
+
+  useEffect(() => {
+    // console.log(meta.initialValue, field.value, meta.initialValue === field.value);
+    // console.log(field.name, " isInitial: ", meta.initialValue === field.value);
+    // console.log("dirty:", dirty);
+    // (meta.initialValue !== field.value || !dirty) && hasChanged(dirty);
+    hasChanged(dirty)
+  }, [field.value]);
+
   return (
-    <FormControl isDisabled={viewMode}>
-      <FormControl.Label
-        _text={{
-          textTransform: "uppercase"
-        }}
-      >
-        {label}
-      </FormControl.Label>
+    <FormControl isDisabled={isViewMode} isInvalid={meta.touched && meta.error}>
+      <HStack space="1">
+        <FormControl.Label
+          flex="1"
+          _text={{
+            textTransform: "uppercase"
+          }}
+        >
+          {label}
+        </FormControl.Label>
+        <FormControl.ErrorMessage>{meta.error}</FormControl.ErrorMessage>
+      </HStack>
       <Input
         p={2}
-        placeholder={placeHolder}
-        borderWidth={(viewMode) ? "0" : "1"}
+        borderWidth={(isViewMode) ? "0" : "1"}
         {...props}
-      // value={values.accountName}
-      // onChangeText={handleChange("accountName")}
-      // onBlur={handleBlur("accountName")}
       />
+      {/* <FormControl.HelperText></FormControl.HelperText> */}
     </FormControl>
   )
 }
 
 InputField.propTypes = {
+  name: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
-  placeHolder: PropTypes.string,
-  viewMode: PropTypes.bool.isRequired
+  isViewMode: PropTypes.bool,
+  hasChanged: PropTypes.func.isRequired
 }
 
 export default InputField

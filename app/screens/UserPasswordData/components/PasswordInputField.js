@@ -1,49 +1,80 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Box, Button, FormControl, Icon, IconButton, Input } from 'native-base';
+import * as Clipboard from 'expo-clipboard';
+import { useFormikContext, useField } from 'formik';
+import { Box, FormControl, HStack, Icon, IconButton, Input, Text, useToast } from 'native-base';
 import { FontAwesome } from '@expo/vector-icons';
+
 import PasswordStrengthBar from './PasswordStrengthBar';
-import { getPasswordEntrophy } from '../../../utils/passwordEntrophyCalculator';
+import { getPasswordEntropy, getSecurityStatusMessage } from '../../../utils/passwordEntropyCalculator';
 
 function PasswordInputField({
   label,
-  placeholder,
-  viewMode,
+  isViewMode = false,
+  hasChanged,
   hasPasswordChecker = false,
   ...props
 }) {
   const [showPassword, setShowPassword] = useState(false);
+  const [field, meta] = useField(props);
+  const { values, setValues, dirty } = useFormikContext();
+
+  useEffect(() => {
+    // console.log(field.name, " isInitial: ", meta.initialValue === field.value);
+    // console.log("dirty:", dirty);
+    hasPasswordChecker && setValues({ ...values, passwordStrength: getPasswordEntropy(field.value) });
+    hasChanged(dirty);
+  }, [field.value]);
+
+  useEffect(() => {
+    setShowPassword(false);
+  }, [isViewMode]);
+
+  const toast = useToast();
+  const copyToClipboard = async (text) => {
+    toast.closeAll();
+    await Clipboard.setStringAsync(text);
+    toast.show({
+      description: "Password copied to clipboard"
+    });
+  };
 
   return (
-    <FormControl isDisabled={viewMode}>
-      <FormControl.Label
-        _text={{
-          textTransform: "uppercase"
-        }}
-      >
-        Password
-      </FormControl.Label>
+    <FormControl isDisabled={isViewMode} isInvalid={meta.touched && meta.error}>
+      <HStack space="1">
+        <FormControl.Label
+          flex="1"
+          _text={{
+            textTransform: "uppercase"
+          }}
+        >
+          {label}
+        </FormControl.Label>
+        <FormControl.ErrorMessage>{meta.error}</FormControl.ErrorMessage>
+      </HStack>
       <Input
         p={2}
-        borderWidth={(viewMode) ? "0" : "1"}
+        borderWidth={(isViewMode) ? "0" : "1"}
         type={showPassword ? "text" : "password"}
         {...props}
         rightElement={
           <Box
             flexDirection="row"
+            mr="1"
           >
             <IconButton
-              icon={<Icon as={FontAwesome} name={showPassword ? "eye-slash" : "eye"} />}
+              icon={<Icon as={FontAwesome} name={showPassword ? "eye" : "eye-slash"} />}
               borderRadius="full"
               onPress={() => {
                 setShowPassword(!showPassword)
               }}
             />
-            {/* {(viewMode) ? */}
-            {(viewMode) &&
+            {/* {(isViewMode) ? */}
+            {(isViewMode) &&
               <IconButton
                 icon={<Icon as={FontAwesome} name="copy" />}
                 borderRadius="full"
+                onPress={() => copyToClipboard(field.value)}
               />
               // :
               // <Button
@@ -55,14 +86,15 @@ function PasswordInputField({
           </Box>
         }
       />
-      {(viewMode) && <FormControl.HelperText
-        alignItems="flex-end"
-      >
-        Security Status
-      </FormControl.HelperText>}
+      {(isViewMode) &&
+        <FormControl.HelperText alignItems="flex-end">
+          <Text>
+            Security Status: {getSecurityStatusMessage(values.passwordStrength)}
+          </Text>
+        </FormControl.HelperText>}
       {
-        (!viewMode) && (hasPasswordChecker) &&
-        <PasswordStrengthBar value={getPasswordEntrophy(props.value)} />
+        (!isViewMode) && (hasPasswordChecker) &&
+        <PasswordStrengthBar value={values.passwordStrength} />
       }
     </FormControl>
   )
@@ -70,8 +102,8 @@ function PasswordInputField({
 
 PasswordInputField.propTypes = {
   label: PropTypes.string.isRequired,
-  placeholder: PropTypes.string,
-  viewMode: PropTypes.bool.isRequired,
+  isViewMode: PropTypes.bool,
+  hasChanged: PropTypes.func,
   hasPasswordChecker: PropTypes.bool
 }
 

@@ -1,25 +1,49 @@
 import React, { useState } from 'react';
 import PropTypes from "prop-types";
 import { Box, Center, Modal, Text, VStack } from 'native-base';
-import { TouchableHighlight, TouchableOpacity } from 'react-native';
+import { TouchableOpacity } from 'react-native';
 import { useFormikContext } from 'formik';
 
 const categories = [
+  "Art and Design",
+  "Auto and Vehicles",
+  "Beauty",
+  "Books and Reference",
+  "Business",
+  "Comics",
+  "Communications",
+  "Dating",
+  "Education",
+  "Entertainment",
+  "Events",
+  "Finance",
+  "Food and Drink",
+  "Health and Fitness",
+  "House and Home",
+  "Libraries and Demos",
+  "Lifestyle",
+  "Maps and Navigation",
+  "Music and Audio",
+  "News and Magazines",
+  "Parenting",
+  "Personalisation",
+  "Photography",
+  "Productivity",
+  "Shopping",
   "Social",
-  "News",
-  "Games",
-  "Finances",
-  "Store",
-  "Blogs"
+  "Sports",
+  "Tools",
+  "Travel and Local",
+  "Video Players and Editors",
+  "Weather"
 ];
 
 function ModalCategories({
   isOpen,
-  setShowModal,
-  setCategory
+  setShowModal
 }) {
 
-  const { values } = useFormikContext();
+  const { setFieldValue, setFieldTouched } = useFormikContext();
 
   return (
     <Center>
@@ -41,7 +65,8 @@ function ModalCategories({
                     <TouchableOpacity
                       key={index}
                       onPress={() => {
-                        values.category = category
+                        setFieldValue("category", category);
+                        setFieldTouched("category", true);
                         setShowModal(false);
                       }}
                     >
